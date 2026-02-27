@@ -1,0 +1,1474 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="RespondaHealth">
+<meta name="theme-color" content="#0B1D3A">
+<title>Responda — Real-Time Emergency Coordination</title>
+<link rel="manifest" href="/manifest.json">
+<style>
+/* ── DESIGN TOKENS ── */
+:root {
+  --navy:#0B1D3A; --navy2:#122244; --blue:#2563EB; --blue2:#3B82F6;
+  --red:#DC2626; --red2:#EF4444; --amber:#D97706; --amber2:#F59E0B;
+  --green:#16A34A; --green2:#22C55E;
+  --white:#FFFFFF; --g50:#F8FAFC; --g100:#F1F5F9; --g200:#E2E8F0;
+  --g300:#CBD5E1; --g400:#94A3B8; --g500:#64748B; --g600:#475569;
+  --g700:#334155; --g800:#1E293B; --g900:#0F172A;
+  --safe-t:env(safe-area-inset-top,0px);
+  --safe-b:env(safe-area-inset-bottom,0px);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{width:100%;height:100%;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#0d1520;overflow:hidden;position:fixed}
+
+/* ── APP SHELL ── */
+#app{width:100%;height:100%;display:flex;flex-direction:column;max-width:480px;margin:0 auto;background:var(--white);box-shadow:0 0 40px rgba(0,0,0,.2);position:relative;overflow:hidden}
+
+/* ── SCREENS ── */
+.screen{display:none;flex-direction:column;width:100%;height:100%;position:absolute;top:0;left:0;animation:sIn .22s ease}
+.screen.active{display:flex}
+@keyframes sIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+
+/* ── SPLASH ── */
+#scr-splash{background:linear-gradient(160deg,var(--navy) 0%,var(--navy2) 55%,#1a1040 100%);align-items:center;justify-content:center;cursor:pointer}
+.sp-wrap{text-align:center;padding:40px 28px}
+.sp-icon{width:88px;height:88px;background:var(--red2);border-radius:24px;display:grid;place-items:center;font-size:42px;margin:0 auto 22px;box-shadow:0 12px 40px rgba(239,68,68,.5);animation:pop .8s cubic-bezier(.34,1.56,.64,1) both}
+@keyframes pop{from{opacity:0;transform:scale(.3)}to{opacity:1;transform:scale(1)}}
+.sp-name{font-size:2.6rem;font-weight:900;color:var(--white);letter-spacing:-1px;margin-bottom:5px;animation:fup .6s .3s ease both}
+.sp-name em{color:#F87171;font-style:normal}
+.sp-tag{font-size:.76rem;color:rgba(255,255,255,.38);letter-spacing:.12em;text-transform:uppercase;margin-bottom:36px;animation:fup .6s .5s ease both}
+@keyframes fup{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.sp-hb{width:200px;margin:0 auto 32px;animation:fup .6s .7s ease both}
+.sp-bar-wrap{display:flex;flex-direction:column;align-items:center;gap:10px;animation:fup .6s .9s ease both}
+.sp-bar{width:160px;height:3px;background:rgba(255,255,255,.1);border-radius:2px;overflow:hidden}
+.sp-fill{height:100%;background:linear-gradient(90deg,var(--red2),var(--blue2));border-radius:2px;animation:ld 2.2s ease both}
+@keyframes ld{from{width:0}to{width:100%}}
+.sp-txt{font-size:.67rem;color:rgba(255,255,255,.28);letter-spacing:.09em}
+.sp-hint{margin-top:24px;font-size:.68rem;color:rgba(255,255,255,.2);letter-spacing:.07em}
+
+/* ── LOGIN ── */
+#scr-login{background:var(--navy)}
+.login-top{padding:calc(var(--safe-t) + 44px) 26px 26px;background:linear-gradient(160deg,var(--navy),var(--navy2));text-align:center;flex-shrink:0}
+.l-icon{width:54px;height:54px;background:var(--red2);border-radius:16px;display:grid;place-items:center;font-size:26px;margin:0 auto 13px;box-shadow:0 6px 24px rgba(239,68,68,.4)}
+.l-name{font-size:1.8rem;font-weight:900;color:var(--white)}
+.l-name em{color:#F87171;font-style:normal}
+.l-sub{font-size:.7rem;color:rgba(255,255,255,.35);letter-spacing:.12em;text-transform:uppercase;margin-top:4px}
+.login-body{flex:1;background:var(--g50);border-radius:26px 26px 0 0;padding:22px 18px calc(var(--safe-b) + 18px);overflow-y:auto;display:flex;flex-direction:column;gap:12px}
+.sec-lbl{font-size:.69rem;font-weight:800;color:var(--g500);text-transform:uppercase;letter-spacing:.08em}
+
+/* role cards */
+.role-card{display:flex;align-items:center;gap:12px;padding:13px 14px;background:var(--white);border:2px solid var(--g200);border-radius:12px;cursor:pointer;transition:all .15s;user-select:none}
+.role-card.active{border-color:var(--blue);background:#EFF6FF;box-shadow:0 0 0 3px rgba(37,99,235,.12)}
+.role-emoji{font-size:24px}
+.role-name{font-size:.88rem;font-weight:800;color:var(--g900)}
+.role-desc{font-size:.7rem;color:var(--g400);margin-top:2px}
+.role-chk{width:20px;height:20px;border-radius:50%;background:var(--blue);display:grid;place-items:center;color:var(--white);font-size:10px;margin-left:auto;opacity:0;transition:opacity .15s;flex-shrink:0}
+.role-card.active .role-chk{opacity:1}
+
+/* form */
+.fg{display:flex;flex-direction:column;gap:5px}
+.fl{font-size:.69rem;font-weight:800;color:var(--g600);text-transform:uppercase;letter-spacing:.07em}
+.fi{padding:11px 14px;border:1.5px solid var(--g200);border-radius:10px;font-size:.95rem;color:var(--g900);background:var(--white);outline:none;transition:border-color .15s;-webkit-appearance:none;width:100%;font-family:inherit}
+.fi:focus{border-color:var(--blue)}
+.fi::placeholder{color:var(--g300)}
+
+/* buttons */
+.btn{display:flex;align-items:center;justify-content:center;gap:7px;padding:14px 18px;border-radius:12px;border:none;cursor:pointer;font-weight:800;font-size:.9rem;width:100%;transition:all .18s;-webkit-appearance:none;font-family:inherit}
+.btn:active{transform:scale(.97)}
+.btn-blue{background:var(--blue);color:var(--white);box-shadow:0 4px 16px rgba(37,99,235,.35)}
+.btn-red{background:var(--red2);color:var(--white);box-shadow:0 4px 16px rgba(239,68,68,.35)}
+.btn-green{background:var(--green);color:var(--white);box-shadow:0 4px 16px rgba(22,163,74,.3)}
+.btn-ghost{background:var(--g100);color:var(--g700)}
+.btn-outline{background:transparent;border:2px solid var(--blue);color:var(--blue)}
+.btn-sm{padding:9px 14px;font-size:.82rem;border-radius:9px}
+.emerg-btn{display:flex;align-items:center;justify-content:center;gap:8px;padding:12px;border-radius:10px;background:#fff1f2;border:1.5px solid rgba(220,38,38,.2);cursor:pointer;color:var(--red);font-weight:800;font-size:.84rem}
+.link-row{text-align:center;font-size:.75rem;color:var(--g400)}
+.link-row a{color:var(--blue);font-weight:700;cursor:pointer;text-decoration:none}
+
+/* conn status */
+.conn-status{text-align:center;font-size:.68rem;padding:9px 12px;border-radius:8px;background:var(--g100);color:var(--g500)}
+.conn-status a{color:var(--blue);font-weight:800;cursor:pointer}
+
+/* ── APP HEADER ── */
+.app-hdr{background:var(--navy);padding:calc(var(--safe-t) + 12px) 18px 15px;flex-shrink:0}
+.hdr-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:2px}
+.hdr-logo{display:flex;align-items:center;gap:8px}
+.hdr-dot{width:28px;height:28px;background:var(--red2);border-radius:8px;display:grid;place-items:center;font-size:13px;box-shadow:0 3px 10px rgba(239,68,68,.4)}
+.hdr-brand{font-weight:900;font-size:1rem;color:var(--white)}
+.hdr-brand em{color:#F87171;font-style:normal}
+.hdr-sub{font-size:.67rem;color:rgba(255,255,255,.42);margin-top:1px}
+.hdr-title{font-size:1.1rem;font-weight:900;color:var(--white);margin-top:4px}
+.hdr-right{display:flex;align-items:center;gap:8px}
+.live-badge{display:inline-flex;align-items:center;gap:5px;background:rgba(34,197,94,.15);border:1px solid rgba(34,197,94,.3);border-radius:100px;padding:3px 9px;font-size:.61rem;font-weight:800;color:var(--green2);letter-spacing:.05em}
+.live-dot{width:6px;height:6px;border-radius:50%;background:var(--green2);animation:blink 1.5s ease-in-out infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.2}}
+.ava-btn{width:34px;height:34px;border-radius:50%;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.15);display:grid;place-items:center;font-size:16px;cursor:pointer}
+
+/* ── SCROLL BODY ── */
+.scroll{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:14px 14px calc(var(--safe-b) + 76px);display:flex;flex-direction:column;gap:12px}
+
+/* ── CARDS ── */
+.card{background:var(--white);border-radius:14px;padding:15px;box-shadow:0 1px 4px rgba(0,0,0,.06);border:1px solid var(--g100)}
+.card-title{font-size:.65rem;font-weight:800;text-transform:uppercase;letter-spacing:.09em;color:var(--g400);margin-bottom:12px}
+
+/* ── BED METERS ── */
+.bed-item{padding-bottom:11px;border-bottom:1px solid var(--g100);margin-bottom:11px}
+.bed-item:last-child{border:none;margin:0;padding:0}
+.bed-hdr{display:flex;justify-content:space-between;align-items:center;margin-bottom:5px}
+.bed-name{font-size:.83rem;font-weight:800;color:var(--g800)}
+.bed-num{font-size:1.05rem;font-weight:900}
+.bed-total{font-size:.64rem;color:var(--g400);font-weight:600}
+.meter{height:7px;background:var(--g100);border-radius:4px;overflow:hidden;margin-bottom:4px}
+.mf{height:100%;border-radius:4px;transition:width .5s ease}
+.mf.g{background:linear-gradient(90deg,#16a34a,#22c55e)}
+.mf.a{background:linear-gradient(90deg,#b45309,#f59e0b)}
+.mf.r{background:linear-gradient(90deg,#991b1b,#ef4444)}
+.bed-foot{display:flex;justify-content:space-between;font-size:.62rem;color:var(--g400)}
+
+/* ── SERVICE ROWS ── */
+.svc-row{display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--g100)}
+.svc-row:last-child{border:none}
+.svc-l{display:flex;align-items:center;gap:10px}
+.svc-ico{width:34px;height:34px;border-radius:9px;display:grid;place-items:center;font-size:15px;flex-shrink:0}
+.svc-name{font-size:.82rem;font-weight:800;color:var(--g900)}
+.svc-sub{font-size:.66rem;color:var(--g400)}
+
+/* ── CHIPS ── */
+.chip{display:inline-flex;align-items:center;gap:3px;padding:4px 9px;border-radius:100px;font-size:.64rem;font-weight:800}
+.cg{background:#dcfce7;color:#15803d}
+.cr{background:#fee2e2;color:#b91c1c}
+.ca{background:#fef3c7;color:#92400e}
+.cb{background:#dbeafe;color:#1d4ed8}
+.cgr{background:var(--g100);color:var(--g600)}
+
+/* ── TOGGLE ── */
+.tog-row{display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--g100)}
+.tog-row:last-child{border:none}
+.tog-l{display:flex;align-items:center;gap:10px}
+.tog-ln{font-size:.83rem;font-weight:800;color:var(--g900)}
+.tog-ls{font-size:.66rem;color:var(--g400)}
+.tog{width:44px;height:24px;border-radius:12px;position:relative;cursor:pointer;transition:background .2s;flex-shrink:0}
+.tog.on{background:var(--green2)}.tog.warn{background:var(--amber2)}.tog.off{background:var(--g300)}
+.tog::after{content:'';position:absolute;top:2px;width:20px;height:20px;border-radius:50%;background:var(--white);box-shadow:0 1px 4px rgba(0,0,0,.22);transition:left .2s}
+.tog.on::after{left:22px}.tog.warn::after{left:22px}.tog.off::after{left:2px}
+
+/* ── STEPPER ── */
+.step-row{display:flex;align-items:center;justify-content:space-between;padding:11px 0;border-bottom:1px solid var(--g100)}
+.step-row:last-child{border:none}
+.step-ln{font-size:.84rem;font-weight:800;color:var(--g900)}
+.step-ls{font-size:.66rem;color:var(--g400)}
+.step-ctrl{display:flex;align-items:center;gap:8px}
+.step-btn{width:32px;height:32px;border-radius:50%;border:2px solid var(--g200);background:var(--white);color:var(--g700);font-size:18px;font-weight:800;cursor:pointer;display:grid;place-items:center;transition:all .15s;line-height:1;font-family:inherit}
+.step-btn:active{border-color:var(--blue);color:var(--blue);transform:scale(.9)}
+.step-val{font-size:1.05rem;font-weight:900;color:var(--navy);min-width:28px;text-align:center}
+
+/* ── ALERT BANNERS ── */
+.ab{border-radius:10px;padding:11px 13px;display:flex;gap:9px;align-items:flex-start}
+.ab.r{background:#fef2f2;border:1px solid rgba(239,68,68,.2)}
+.ab.a{background:#fffbeb;border:1px solid rgba(245,158,11,.22)}
+.ab.g{background:#f0fdf4;border:1px solid rgba(34,197,94,.22)}
+.ab.b{background:#eff6ff;border:1px solid rgba(37,99,235,.2)}
+.ab-ico{font-size:15px;flex-shrink:0;margin-top:1px}
+.ab-title{font-size:.78rem;font-weight:900;margin-bottom:2px}
+.ab-body{font-size:.71rem;line-height:1.45}
+.ab.r .ab-title{color:#991b1b}.ab.r .ab-body{color:#7f1d1d}
+.ab.a .ab-title{color:#92400e}.ab.a .ab-body{color:#78350f}
+.ab.g .ab-title{color:#14532d}.ab.g .ab-body{color:#166534}
+.ab.b .ab-title{color:#1e40af}.ab.b .ab-body{color:#1d4ed8}
+
+/* ── BOTTOM NAV ── */
+.bnav{position:absolute;bottom:0;left:0;right:0;background:var(--white);border-top:1px solid var(--g100);display:flex;justify-content:space-around;padding:8px 0 calc(var(--safe-b) + 8px);z-index:100}
+.bni{display:flex;flex-direction:column;align-items:center;gap:2px;font-size:.59rem;font-weight:800;color:var(--g400);cursor:pointer;padding:4px 12px;border-radius:10px;transition:all .15s;user-select:none}
+.bni.active{color:var(--blue);background:#eff6ff}
+.bni-ico{font-size:20px}
+.bni-dot{width:4px;height:4px;border-radius:50%;background:var(--blue)}
+
+/* ── MAP ── */
+.map-box{height:218px;border-radius:14px;overflow:hidden;position:relative;background:#d4e8a0;border:1px solid rgba(0,0,0,.07)}
+.map-rd-h{position:absolute;height:8px;background:rgba(255,255,255,.8);left:0;right:0}
+.map-rd-v{position:absolute;width:8px;background:rgba(255,255,255,.8);top:0;bottom:0}
+.map-lbl{position:absolute;font-size:.55rem;color:rgba(0,0,0,.4);font-weight:700}
+.pin{position:absolute;display:flex;flex-direction:column;align-items:center;cursor:pointer;transition:transform .15s;z-index:10}
+.pin:active{transform:scale(1.12)}
+.pin-bbl{border-radius:9px 9px 9px 0;padding:4px 8px;font-size:.58rem;font-weight:900;white-space:nowrap;color:var(--white);box-shadow:0 2px 8px rgba(0,0,0,.25);margin-bottom:2px}
+.pin-bbl.g{background:var(--green)}.pin-bbl.a{background:var(--amber)}.pin-bbl.r{background:var(--red)}
+.pin-dot{width:10px;height:10px;border-radius:50%;border:2px solid var(--white);box-shadow:0 1px 4px rgba(0,0,0,.3)}
+.pin-dot.g{background:var(--green)}.pin-dot.a{background:var(--amber)}.pin-dot.r{background:var(--red)}
+.my-loc{position:absolute;width:14px;height:14px;border-radius:50%;background:var(--blue);border:3px solid var(--white);box-shadow:0 0 0 8px rgba(37,99,235,.14),0 2px 8px rgba(0,0,0,.3);animation:pulse 2s ease-in-out infinite}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 6px rgba(37,99,235,.1),0 2px 8px rgba(0,0,0,.3)}50%{box-shadow:0 0 0 14px rgba(37,99,235,.04),0 2px 8px rgba(0,0,0,.3)}}
+
+/* ── FILTER TAGS ── */
+.filter-row{display:flex;gap:7px;overflow-x:auto;scrollbar-width:none}
+.filter-row::-webkit-scrollbar{display:none}
+.ftag{padding:6px 13px;border-radius:100px;font-size:.71rem;font-weight:800;white-space:nowrap;cursor:pointer;border:1.5px solid var(--g200);color:var(--g500);background:var(--white);transition:all .15s;flex-shrink:0;user-select:none}
+.ftag.active{background:var(--blue);border-color:var(--blue);color:var(--white)}
+
+/* ── HOSPITAL LIST ITEM ── */
+.hi{display:flex;align-items:center;gap:11px;padding:12px;border-radius:12px;background:var(--white);border:1px solid var(--g200);cursor:pointer;transition:all .15s;position:relative}
+.hi:active,.hi.sel{border-color:var(--blue);box-shadow:0 0 0 3px rgba(37,99,235,.1);background:#f0f7ff}
+.hi.dim{opacity:.45;pointer-events:none}
+.best-tag{position:absolute;top:-1px;left:12px;background:var(--blue);color:var(--white);font-size:.55rem;font-weight:900;padding:2px 8px;border-radius:0 0 7px 7px;letter-spacing:.04em}
+.hi-ava{width:42px;height:42px;border-radius:12px;display:grid;place-items:center;font-size:18px;flex-shrink:0}
+.hi-name{font-size:.84rem;font-weight:900;color:var(--g900);margin-bottom:2px}
+.hi-meta{font-size:.67rem;color:var(--g400)}
+.hi-chips{display:flex;gap:4px;margin-top:5px;flex-wrap:wrap}
+.hi-r{margin-left:auto;text-align:right;flex-shrink:0}
+.hi-n{font-size:1.3rem;font-weight:900;line-height:1}
+.hi-l{font-size:.6rem;color:var(--g400);font-weight:700}
+
+/* ── FACILITY DETAIL HERO ── */
+.det-hero{background:linear-gradient(155deg,var(--navy),#1a3566);padding:calc(var(--safe-t) + 10px) 18px 20px;flex-shrink:0}
+.det-back{font-size:.71rem;color:rgba(255,255,255,.42);cursor:pointer;margin-bottom:11px;display:inline-block}
+.det-row{display:flex;align-items:center;gap:12px;margin-bottom:14px}
+.det-ico{width:50px;height:50px;border-radius:14px;display:grid;place-items:center;font-size:23px;flex-shrink:0}
+.det-name{font-size:1.02rem;font-weight:900;color:var(--white);line-height:1.25}
+.det-sub{font-size:.67rem;color:rgba(255,255,255,.44);margin-top:2px}
+.det-metrics{display:flex;gap:9px}
+.det-metric{flex:1;border-radius:10px;padding:10px 12px;text-align:center;background:rgba(255,255,255,.1)}
+.det-metric.hl{background:rgba(34,197,94,.2);border:1px solid rgba(34,197,94,.3)}
+.det-mn{font-size:1.05rem;font-weight:900;color:var(--white)}
+.det-metric.hl .det-mn{color:var(--green2)}
+.det-ml{font-size:.58rem;color:rgba(255,255,255,.42)}
+
+/* ── ADMIN STATS ── */
+.stat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.stat-box{background:var(--white);border-radius:12px;padding:14px 10px;text-align:center;border:1px solid var(--g100);box-shadow:0 1px 3px rgba(0,0,0,.05)}
+.stat-n{font-size:1.7rem;font-weight:900;line-height:1;margin-bottom:3px}
+.stat-n.b{color:var(--blue)}.stat-n.g{color:var(--green)}.stat-n.r{color:var(--red)}.stat-n.a{color:var(--amber)}
+.stat-l{font-size:.61rem;font-weight:800;color:var(--g400);text-transform:uppercase;letter-spacing:.06em;line-height:1.3}
+
+/* ── ADMIN TABLE ── */
+.adm-tbl{width:100%;border-collapse:collapse;font-size:.73rem}
+.adm-tbl th{background:var(--g50);color:var(--g500);padding:8px 10px;text-align:left;font-size:.62rem;text-transform:uppercase;letter-spacing:.06em;font-weight:800;border-bottom:1px solid var(--g100);white-space:nowrap}
+.adm-tbl td{padding:9px 10px;border-bottom:1px solid var(--g100);color:var(--g700);vertical-align:middle}
+.adm-tbl tr:last-child td{border:none}
+.adm-tbl td strong{color:var(--g900)}
+
+/* ── NOTIF ITEMS ── */
+.nitem{display:flex;gap:11px;padding:11px 0;border-bottom:1px solid var(--g100)}
+.nitem:last-child{border:none}
+.nitem-ico{width:38px;height:38px;border-radius:11px;display:grid;place-items:center;font-size:15px;flex-shrink:0}
+.nitem-ico.r{background:#fee2e2}.nitem-ico.b{background:#dbeafe}.nitem-ico.g{background:#dcfce7}.nitem-ico.a{background:#fef3c7}
+.nitem-title{font-size:.8rem;font-weight:900;color:var(--g900);margin-bottom:2px}
+.nitem-body{font-size:.7rem;color:var(--g500);line-height:1.43}
+.nitem-time{font-size:.61rem;color:var(--g400);margin-top:3px}
+.nitem-dot{width:8px;height:8px;border-radius:50%;background:var(--red2);margin-left:auto;flex-shrink:0;margin-top:5px}
+
+/* ── BAR CHART ── */
+.bchart{display:flex;align-items:flex-end;gap:8px;height:90px}
+.bc-col{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;height:100%}
+.bc-wrap{flex:1;width:100%;display:flex;align-items:flex-end}
+.bc-bar{width:100%;border-radius:5px 5px 0 0}
+.bc-bar.b{background:linear-gradient(180deg,var(--blue2),var(--blue))}
+.bc-bar.r{background:linear-gradient(180deg,var(--red2),var(--red))}
+.bc-lbl{font-size:.56rem;color:var(--g400)}
+
+/* ── PROFILE ── */
+.prof-hdr{background:linear-gradient(155deg,var(--navy),var(--navy2));padding:calc(var(--safe-t) + 20px) 20px 24px;text-align:center;flex-shrink:0}
+.prof-ava{width:72px;height:72px;border-radius:50%;background:var(--blue);margin:0 auto 12px;display:grid;place-items:center;font-size:32px;border:3px solid rgba(255,255,255,.2)}
+.prof-name{font-size:1.1rem;font-weight:900;color:var(--white)}
+.prof-role{font-size:.71rem;color:rgba(255,255,255,.44);margin-top:4px}
+.prof-hosp{font-size:.75rem;color:rgba(255,255,255,.6);margin-top:6px}
+.set-item{display:flex;align-items:center;gap:13px;padding:14px;cursor:pointer;transition:background .15s}
+.set-item:active{background:var(--g100)}
+.set-ico{width:36px;height:36px;border-radius:9px;display:grid;place-items:center;font-size:17px;flex-shrink:0}
+.set-lbl{font-size:.88rem;font-weight:800;color:var(--g900)}
+.set-sub{font-size:.7rem;color:var(--g400)}
+.set-arr{margin-left:auto;color:var(--g300);font-size:18px}
+.dvd{height:1px;background:var(--g100)}
+
+/* ── SETUP ── */
+#scr-setup{background:var(--g50)}
+.setup-hdr{background:var(--navy);padding:calc(var(--safe-t) + 20px) 20px 24px;flex-shrink:0}
+.setup-title{font-size:1.4rem;font-weight:900;color:var(--white);margin-bottom:4px}
+.setup-sub{font-size:.78rem;color:rgba(255,255,255,.5)}
+.setup-body{flex:1;padding:18px;overflow-y:auto;display:flex;flex-direction:column;gap:16px}
+.setup-sec{background:var(--white);border-radius:14px;padding:18px;box-shadow:0 1px 4px rgba(0,0,0,.06)}
+.setup-sec-title{font-size:.75rem;font-weight:900;color:var(--g900);text-transform:uppercase;letter-spacing:.07em;margin-bottom:11px}
+.setup-note{background:#fffbeb;border:1px solid rgba(245,158,11,.25);border-radius:10px;padding:12px 14px;font-size:.78rem;color:#78350f;line-height:1.6}
+.setup-note strong{font-weight:900;color:#92400e}
+.setup-code{background:var(--g900);border-radius:10px;padding:14px;font-family:'Courier New',monospace;font-size:.71rem;color:#93c5fd;line-height:1.7;overflow-x:auto;white-space:pre;margin:10px 0}
+
+/* ── REGISTER ── */
+#scr-register{background:var(--g50)}
+
+/* ── LOADING / TOAST ── */
+#loading{position:fixed;inset:0;background:rgba(11,29,58,.7);display:none;place-items:center;z-index:10000;backdrop-filter:blur(3px)}
+#loading.show{display:grid}
+.spinner{width:46px;height:46px;border-radius:50%;border:4px solid rgba(255,255,255,.15);border-top-color:var(--white);animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+#toast{position:fixed;bottom:88px;left:50%;transform:translateX(-50%) translateY(16px);background:var(--g900);color:var(--white);padding:11px 20px;border-radius:100px;font-size:.83rem;font-weight:700;box-shadow:0 6px 28px rgba(0,0,0,.3);opacity:0;transition:all .28s;z-index:9999;max-width:88%;text-align:center;pointer-events:none}
+#toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.flex-row{display:flex;gap:10px}.f1{flex:1}
+.mt8{margin-top:8px}.mt12{margin-top:12px}
+.section-hdr{display:flex;justify-content:space-between;align-items:center}
+.section-title{font-size:.8rem;font-weight:900;color:var(--g700)}
+</style>
+</head>
+<body>
+<div id="app">
+
+<!-- ══════════ SPLASH ══════════ -->
+<div id="scr-splash" class="screen active" onclick="skipSplash()">
+  <div class="sp-wrap">
+    <div class="sp-icon">🏥</div>
+    <div class="sp-name">Responda<em>Health</em></div>
+    <div class="sp-tag">Real-Time Emergency Coordination & Referral</div>
+    <div class="sp-hb">
+      <svg viewBox="0 0 200 50" fill="none">
+        <path d="M0 25 L22 25 L36 6 L47 44 L57 15 L66 35 L74 25 L100 25 L114 25 L128 6 L139 44 L149 15 L158 35 L166 25 L200 25"
+          stroke="#EF4444" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <animate attributeName="stroke-dasharray" values="0 600;600 0" dur="2.5s" repeatCount="indefinite"/>
+        </path>
+      </svg>
+    </div>
+    <div class="sp-bar-wrap">
+      <div class="sp-bar"><div class="sp-fill"></div></div>
+      <div class="sp-txt">POWERED BY FIREBASE · FREE FOREVER</div>
+    </div>
+    <div class="sp-hint">Tap anywhere to skip</div>
+  </div>
+</div>
+
+<!-- ══════════ SETUP ══════════ -->
+<div id="scr-setup" class="screen">
+  <div class="setup-hdr">
+    <div class="setup-title">⚙️ Advanced Settings</div>
+    <div class="setup-sub">Firebase pre-configured · respondahealth project</div>
+  </div>
+  <div class="setup-body">
+    <div style="background:#fff8f0;border:1.5px solid rgba(255,152,0,.3);border-radius:12px;padding:14px;display:flex;align-items:center;gap:12px;margin-bottom:4px">
+      <span style="font-size:28px">🔥</span>
+      <div><div style="font-size:.9rem;font-weight:900;color:#e65100">Google Firebase</div><div style="font-size:.68rem;color:#bf360c;margin-top:2px">Free forever · No credit card · No surprise billing</div></div>
+    </div>
+    <div class="setup-note">
+      <strong>Where to find these values:</strong> Firebase Console → your project → Project Settings (⚙️) → General → "Your apps" → Web app → Config object.
+    </div>
+    <div class="setup-sec">
+      <div class="setup-sec-title">Firebase Config</div>
+      <div style="display:flex;flex-direction:column;gap:10px;">
+        <div class="fg"><label class="fl">API Key</label><input class="fi" id="cfg-apikey" type="text" placeholder="AIzaSy..." autocomplete="off"></div>
+        <div class="fg"><label class="fl">Project ID</label><input class="fi" id="cfg-projectid" type="text" placeholder="responda-pilot-xxxxx" autocomplete="off"></div>
+        <div class="fg"><label class="fl">Auth Domain</label><input class="fi" id="cfg-authdomain" type="text" placeholder="responda-pilot.firebaseapp.com" autocomplete="off"></div>
+        <div class="fg"><label class="fl">Database URL</label><input class="fi" id="cfg-dburl" type="url" placeholder="https://responda-pilot-default-rtdb.firebaseio.com" autocomplete="off"></div>
+      </div>
+      <button class="btn btn-blue mt12" onclick="saveConfig()">🔥 Save &amp; Connect</button>
+    </div>
+    <button class="btn btn-ghost btn-sm" onclick="useDemoMode()">🎭 Use Demo Mode (10 participants pre-loaded)</button>
+    <div class="setup-note" style="font-size:.72rem;">
+    el.innerHTML='🟢 Firebase: <strong>respondahealth</strong> · Live';
+    </div>
+  </div>
+</div>
+
+<!-- ══════════ LOGIN ══════════ -->
+<div id="scr-login" class="screen">
+  <div class="login-top">
+    <div class="l-icon">🏥</div>
+    <div class="l-name">Responda<em>Health</em></div>
+    <div class="l-sub">Real-Time Emergency Coordination Platform</div>
+  </div>
+  <div class="login-body">
+    <div class="sec-lbl">Select Your Role</div>
+    <div class="role-card active" id="rc-staff" onclick="selRole('staff')">
+      <span class="role-emoji">🏥</span>
+      <div><div class="role-name">Hospital Staff</div><div class="role-desc">Nurse / Bed Manager / Doctor</div></div>
+      <div class="role-chk">✓</div>
+    </div>
+    <div class="role-card" id="rc-ambulance" onclick="selRole('ambulance')">
+      <span class="role-emoji">🚑</span>
+      <div><div class="role-name">Ambulance Driver</div><div class="role-desc">Emergency Referral Officer</div></div>
+      <div class="role-chk">✓</div>
+    </div>
+    <div class="role-card" id="rc-admin" onclick="selRole('admin')">
+      <span class="role-emoji">👩‍💼</span>
+      <div><div class="role-name">Health Administrator</div><div class="role-desc">GHS / NHIA / Regional Officer</div></div>
+      <div class="role-chk">✓</div>
+    </div>
+    <div class="fg">
+      <label class="fl">Email</label>
+      <input class="fi" id="l-email" type="email" placeholder="you@hospital.gh" autocomplete="email">
+    </div>
+    <div class="fg">
+      <label class="fl">Password</label>
+      <input class="fi" id="l-pass" type="password" placeholder="••••••••" autocomplete="current-password">
+    </div>
+    <button class="btn btn-blue" onclick="doLogin()">Sign In →</button>
+    <div class="emerg-btn" onclick="emergencyAccess()">🚨 Emergency Quick Access (No Login)</div>
+    <div class="link-row">New user? <a onclick="goRegister()">Register here</a> &nbsp;·&nbsp; No internet? <a onclick="showSMSInfo()">Dial *999#</a></div>
+    <div class="conn-status" id="conn-status">Checking connection...</div>
+  </div>
+</div>
+
+<!-- ══════════ REGISTER ══════════ -->
+<div id="scr-register" class="screen">
+  <div class="app-hdr">
+    <div class="hdr-row">
+      <button class="btn btn-ghost btn-sm" onclick="goScreen('login')" style="background:rgba(255,255,255,.12);color:white;width:auto;padding:6px 14px;">← Back</button>
+    </div>
+    <div class="hdr-title" style="margin-top:8px;">Create Account</div>
+  </div>
+  <div class="scroll" style="padding-bottom:20px;">
+    <div class="ab b"><span class="ab-ico">ℹ️</span><div><div class="ab-title">Pilot Registration</div><div class="ab-body">After registering your admin will verify and assign your hospital. Check your email to confirm your account before signing in.</div></div></div>
+    <div class="card">
+      <div class="card-title">Your Details</div>
+      <div style="display:flex;flex-direction:column;gap:11px;">
+        <div class="fg"><label class="fl">Full Name</label><input class="fi" id="r-name" type="text" placeholder="Nurse Ama Osei"></div>
+        <div class="fg"><label class="fl">Email</label><input class="fi" id="r-email" type="email" placeholder="ama@korlebu.gh"></div>
+        <div class="fg"><label class="fl">Phone</label><input class="fi" id="r-phone" type="tel" placeholder="+233 24 XXX XXXX"></div>
+        <div class="fg"><label class="fl">Staff ID</label><input class="fi" id="r-staffid" type="text" placeholder="e.g. KBTH-2847"></div>
+        <div class="fg">
+          <label class="fl">Role</label>
+          <select class="fi" id="r-role" onchange="roleChanged()">
+            <option value="staff">Hospital Staff (Nurse / Doctor / Bed Manager)</option>
+            <option value="ambulance">Ambulance Driver / Referral Officer</option>
+            <option value="admin">Health Administrator (GHS / NHIA)</option>
+          </select>
+        </div>
+        <div class="fg" id="r-hosp-grp">
+          <label class="fl">Your Hospital</label>
+          <select class="fi" id="r-hospital"><option value="">Loading...</option></select>
+        </div>
+        <div class="fg"><label class="fl">Password (min 8 chars)</label><input class="fi" id="r-pass" type="password" placeholder="••••••••"></div>
+        <div class="fg"><label class="fl">Confirm Password</label><input class="fi" id="r-pass2" type="password" placeholder="••••••••"></div>
+      </div>
+    </div>
+    <button class="btn btn-blue" onclick="doRegister()">Create Account →</button>
+  </div>
+</div>
+
+<!-- ══════════ HOSPITAL STAFF — HOME ══════════ -->
+<div id="scr-hospital-home" class="screen">
+  <div class="app-hdr">
+    <div class="hdr-row">
+      <div class="hdr-logo"><div class="hdr-dot">🏥</div><div class="hdr-brand">Responda<em>Health</em></div></div>
+      <div class="hdr-right"><div class="live-badge"><div class="live-dot"></div>LIVE</div><div class="ava-btn" onclick="goScreen('hospital-profile')">👤</div></div>
+    </div>
+    <div class="hdr-sub" id="hh-name">Loading...</div>
+    <div class="hdr-title">Hospital Dashboard</div>
+  </div>
+  <div class="scroll">
+    <div id="hh-stale" style="display:none;" class="ab a"><span class="ab-ico">⚠️</span><div><div class="ab-title">Update Required</div><div class="ab-body" id="hh-stale-body"></div></div></div>
+    <div class="card">
+      <div class="card-title">Bed Availability</div>
+      <div id="hh-beds"><div style="text-align:center;padding:18px;color:var(--g400)">Loading...</div></div>
+      <button class="btn btn-blue mt12" onclick="goScreen('hospital-update')">✏️ Update Bed Count</button>
+    </div>
+    <div class="card">
+      <div class="card-title">Services &amp; Equipment</div>
+      <div id="hh-svcs"><div style="text-align:center;padding:18px;color:var(--g400)">Loading...</div></div>
+      <button class="btn btn-outline mt12" onclick="goScreen('hospital-update')">⚙️ Edit Services</button>
+    </div>
+    <div class="card">
+      <div class="card-title">On-Call Specialists</div>
+      <div id="hh-specs"></div>
+    </div>
+  </div>
+  <div class="bnav">
+    <div class="bni active"><div class="bni-ico">🏠</div>Home<div class="bni-dot"></div></div>
+    <div class="bni" onclick="goScreen('hospital-update')"><div class="bni-ico">✏️</div>Update</div>
+    <div class="bni" onclick="goScreen('hospital-alerts')"><div class="bni-ico">🔔</div>Alerts</div>
+    <div class="bni" onclick="goScreen('hospital-profile')"><div class="bni-ico">👤</div>Profile</div>
+  </div>
+</div>
+
+<!-- ══════════ HOSPITAL STAFF — UPDATE ══════════ -->
+<div id="scr-hospital-update" class="screen">
+  <div class="app-hdr">
+    <div class="hdr-row">
+      <button class="btn btn-ghost btn-sm" onclick="goScreen('hospital-home')" style="background:rgba(255,255,255,.12);color:white;width:auto;padding:6px 14px;">← Back</button>
+    </div>
+    <div class="hdr-title" style="margin-top:8px;">Update Status</div>
+    <div class="hdr-sub" id="upd-last">Last update: loading...</div>
+  </div>
+  <div class="scroll" style="padding-bottom:20px;">
+    <div class="ab b"><span class="ab-ico">📡</span><div><div class="ab-title">Live Broadcast</div><div class="ab-body">Your changes publish instantly to all ambulance drivers on the network.</div></div></div>
+    <div class="card">
+      <div class="card-title">Available Beds</div>
+      <div class="step-row"><div><div class="step-ln">🛏 Emergency</div><div class="step-ls">Available right now</div></div><div class="step-ctrl"><button class="step-btn" onclick="step('emb',-1)">−</button><div class="step-val" id="sv-emb">0</div><button class="step-btn" onclick="step('emb',1)">+</button></div></div>
+      <div class="step-row"><div><div class="step-ln">🫁 ICU</div><div class="step-ls">Ventilator-capable</div></div><div class="step-ctrl"><button class="step-btn" onclick="step('icu',-1)">−</button><div class="step-val" id="sv-icu">0</div><button class="step-btn" onclick="step('icu',1)">+</button></div></div>
+      <div class="step-row"><div><div class="step-ln">🏥 General Ward</div><div class="step-ls">Admission beds</div></div><div class="step-ctrl"><button class="step-btn" onclick="step('gen',-1)">−</button><div class="step-val" id="sv-gen">0</div><button class="step-btn" onclick="step('gen',1)">+</button></div></div>
+      <div class="step-row"><div><div class="step-ln">👶 Maternity</div><div class="step-ls">Labour + postnatal</div></div><div class="step-ctrl"><button class="step-btn" onclick="step('mat',-1)">−</button><div class="step-val" id="sv-mat">0</div><button class="step-btn" onclick="step('mat',1)">+</button></div></div>
+      <div class="step-row" style="border:none"><div><div class="step-ln">👦 Paediatric</div><div class="step-ls">Under-12 ward</div></div><div class="step-ctrl"><button class="step-btn" onclick="step('ped',-1)">−</button><div class="step-val" id="sv-ped">0</div><button class="step-btn" onclick="step('ped',1)">+</button></div></div>
+    </div>
+    <div class="card">
+      <div class="card-title">Service Status</div>
+      <div class="tog-row"><div class="tog-l"><div class="svc-ico" style="background:#fef3c7">🩻</div><div><div class="tog-ln">CT Scan</div><div class="tog-ls">Radiology</div></div></div><div class="tog on" id="tog-ct" data-svc="ct_scan" onclick="cycleTog(this)"></div></div>
+      <div class="tog-row"><div class="tog-l"><div class="svc-ico" style="background:#f1f5f9">🔬</div><div><div class="tog-ln">MRI Scanner</div><div class="tog-ls">Imaging</div></div></div><div class="tog off" id="tog-mri" data-svc="mri" onclick="cycleTog(this)"></div></div>
+      <div class="tog-row"><div class="tog-l"><div class="svc-ico" style="background:#dbeafe">🩸</div><div><div class="tog-ln">Blood Bank</div><div class="tog-ls">Supply status</div></div></div><div class="tog on" id="tog-blood" data-svc="blood_bank" onclick="cycleTog(this)"></div></div>
+      <div class="tog-row"><div class="tog-l"><div class="svc-ico" style="background:#dcfce7">💨</div><div><div class="tog-ln">Oxygen Supply</div><div class="tog-ls">Cylinder level</div></div></div><div class="tog on" id="tog-o2" data-svc="oxygen" onclick="cycleTog(this)"></div></div>
+      <div class="tog-row"><div class="tog-l"><div class="svc-ico" style="background:#f0fdf4">🔪</div><div><div class="tog-ln">Theatre / OR</div><div class="tog-ls">Operating room</div></div></div><div class="tog on" id="tog-theatre" data-svc="theatre" onclick="cycleTog(this)"></div></div>
+      <div class="tog-row" style="border:none"><div class="tog-l"><div class="svc-ico" style="background:#fefce8">⚡</div><div><div class="tog-ln">Generator</div><div class="tog-ls">Backup power</div></div></div><div class="tog on" id="tog-power" data-svc="generator" onclick="cycleTog(this)"></div></div>
+    </div>
+    <div class="card">
+      <div class="card-title">Blood Supply (units)</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+        <div class="fg"><label class="fl">O-Negative</label><input class="fi" id="b-oneg" type="number" min="0" placeholder="0"></div>
+        <div class="fg"><label class="fl">O-Positive</label><input class="fi" id="b-opos" type="number" min="0" placeholder="0"></div>
+        <div class="fg"><label class="fl">A-Positive</label><input class="fi" id="b-apos" type="number" min="0" placeholder="0"></div>
+        <div class="fg"><label class="fl">B-Positive</label><input class="fi" id="b-bpos" type="number" min="0" placeholder="0"></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">Oxygen Level %</div>
+      <input class="fi" id="o2-lvl" type="number" min="0" max="100" placeholder="e.g. 78">
+    </div>
+    <div class="card">
+      <div class="card-title">Notes (Optional)</div>
+      <textarea class="fi" id="upd-notes" rows="3" style="resize:none" placeholder="e.g. MRI back online ~18:00. O-neg low."></textarea>
+    </div>
+    <div style="background:var(--g100);border-radius:10px;padding:10px 14px;font-size:.7rem;color:var(--g500)" id="upd-attr">Loading...</div>
+    <button class="btn btn-green" onclick="publishUpdate()">✅ Publish to Network</button>
+  </div>
+</div>
+
+<!-- ══════════ HOSPITAL STAFF — ALERTS ══════════ -->
+<div id="scr-hospital-alerts" class="screen">
+  <div class="app-hdr">
+    <div class="hdr-row"><div class="hdr-title">Notifications</div><div id="notif-badge" style="background:var(--red2);color:white;width:22px;height:22px;border-radius:50%;display:grid;place-items:center;font-size:.67rem;font-weight:900;">0</div></div>
+  </div>
+  <div class="scroll">
+    <div id="h-alerts-list"><div style="text-align:center;padding:28px;color:var(--g400)">Loading...</div></div>
+    <div style="background:var(--navy);border-radius:14px;padding:16px;border:1px solid rgba(255,255,255,.07)">
+      <div style="display:flex;align-items:center;gap:9px;margin-bottom:12px"><span style="font-size:18px">📩</span><div><div style="font-size:.87rem;font-weight:900;color:white">SMS Offline Mode</div><div style="font-size:.66rem;color:rgba(255,255,255,.36)">Any phone · Any network · 2G works</div></div></div>
+      <div style="background:rgba(255,255,255,.08);border-radius:9px;padding:12px;margin-bottom:8px"><div style="font-family:'Courier New',monospace;font-size:.72rem;color:#93c5fd;font-weight:600">BEDS [CODE] [EMERG] [ICU] [GEN] [MAT]</div><div style="font-size:.61rem;color:rgba(255,255,255,.32);margin-top:3px">Example: BEDS KORLEBU 14 3 0 8</div><div style="font-size:.61rem;color:rgba(255,255,255,.32)">Send to: 4447 (4GHS)</div></div>
+      <div style="background:#f0fdf4;border:1px solid rgba(34,197,94,.2);border-radius:9px;padding:11px"><div style="font-size:.6rem;font-weight:900;color:var(--green);margin-bottom:4px">📥 SYSTEM REPLY:</div><div style="font-size:.72rem;color:var(--g700);line-height:1.5">✓ KORLE BU UPDATED: Emergency=14, ICU=3, General=0, Maternity=8. Live as of 09:44.</div></div>
+      <div style="text-align:center;margin-top:10px;font-size:.69rem;color:rgba(255,255,255,.28)">Or dial <span style="color:var(--blue2);font-weight:900">*999#</span> for USSD menu</div>
+    </div>
+  </div>
+  <div class="bnav">
+    <div class="bni" onclick="goScreen('hospital-home')"><div class="bni-ico">🏠</div>Home</div>
+    <div class="bni" onclick="goScreen('hospital-update')"><div class="bni-ico">✏️</div>Update</div>
+    <div class="bni active"><div class="bni-ico">🔔</div>Alerts<div class="bni-dot"></div></div>
+    <div class="bni" onclick="goScreen('hospital-profile')"><div class="bni-ico">👤</div>Profile</div>
+  </div>
+</div>
+
+<!-- ══════════ HOSPITAL STAFF — PROFILE ══════════ -->
+<div id="scr-hospital-profile" class="screen">
+  <div class="prof-hdr"><div class="prof-ava">👤</div><div class="prof-name" id="p-name">—</div><div class="prof-role">Hospital Staff</div><div class="prof-hosp" id="p-hosp">—</div></div>
+  <div class="scroll" style="padding-bottom:20px;">
+    <div class="card" style="padding:0;overflow:hidden">
+      <div class="set-item" onclick="goScreen('hospital-home')"><div class="set-ico" style="background:#dbeafe">🏠</div><div><div class="set-lbl">Dashboard</div><div class="set-sub">View hospital status</div></div><div class="set-arr">›</div></div>
+      <div class="dvd"></div>
+      <div class="set-item" onclick="goScreen('hospital-update')"><div class="set-ico" style="background:#dcfce7">✏️</div><div><div class="set-lbl">Update Status</div><div class="set-sub">Beds &amp; services</div></div><div class="set-arr">›</div></div>
+      <div class="dvd"></div>
+      <div class="set-item" onclick="goScreen('setup')"><div class="set-ico" style="background:#f1f5f9">⚙️</div><div><div class="set-lbl">App Settings</div><div class="set-sub">Backend configuration</div></div><div class="set-arr">›</div></div>
+    </div>
+    <button class="btn btn-ghost" onclick="doLogout()">🚪 Sign Out</button>
+  </div>
+  <div class="bnav">
+    <div class="bni" onclick="goScreen('hospital-home')"><div class="bni-ico">🏠</div>Home</div>
+    <div class="bni" onclick="goScreen('hospital-update')"><div class="bni-ico">✏️</div>Update</div>
+    <div class="bni" onclick="goScreen('hospital-alerts')"><div class="bni-ico">🔔</div>Alerts</div>
+    <div class="bni active"><div class="bni-ico">👤</div>Profile<div class="bni-dot"></div></div>
+  </div>
+</div>
+
+<!-- ══════════ AMBULANCE — MAP ══════════ -->
+<div id="scr-ambulance-map" class="screen">
+  <div class="app-hdr">
+    <div class="hdr-row">
+      <div><div class="hdr-sub">🚑 Emergency Coordination · Accra Region</div><div class="hdr-title">Find Hospital</div></div>
+      <div class="hdr-right"><div class="live-badge"><div class="live-dot"></div>GPS</div><div class="ava-btn" onclick="goScreen('ambulance-profile')">👤</div></div>
+    </div>
+  </div>
+  <div class="scroll">
+    <div class="map-box">
+      <div class="map-rd-h" style="top:28%"></div><div class="map-rd-h" style="top:60%"></div>
+      <div class="map-rd-v" style="left:23%"></div><div class="map-rd-v" style="left:65%"></div>
+      <div class="map-lbl" style="top:17%;left:3%">Ring Road</div>
+      <div class="map-lbl" style="top:52%;left:3%">Liberation Rd</div>
+      <div id="map-pins"></div>
+      <div class="my-loc" style="bottom:38%;left:44%"></div>
+      <div style="position:absolute;top:10px;right:10px;background:white;border-radius:8px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,.15)">
+        <div style="width:30px;height:28px;display:grid;place-items:center;font-size:16px;font-weight:900;color:var(--g700);border-bottom:1px solid var(--g100);cursor:pointer">+</div>
+        <div style="width:30px;height:28px;display:grid;place-items:center;font-size:16px;font-weight:900;color:var(--g700);cursor:pointer">−</div>
+      </div>
+    </div>
+    <div class="filter-row">
+      <div class="ftag active" onclick="setFilter('all',this)">All</div>
+      <div class="ftag" onclick="setFilter('icu',this)">🫁 ICU</div>
+      <div class="ftag" onclick="setFilter('ct',this)">🩻 CT Scan</div>
+      <div class="ftag" onclick="setFilter('blood',this)">🩸 Blood</div>
+      <div class="ftag" onclick="setFilter('theatre',this)">🔪 Theatre</div>
+      <div class="ftag" onclick="setFilter('maternity',this)">👶 Maternity</div>
+    </div>
+    <div class="section-hdr">
+      <div class="section-title" id="hosp-lbl">Available Hospitals</div>
+      <div style="font-size:.72rem;font-weight:800;color:var(--blue);cursor:pointer" onclick="sortHospitals()">Sort: ETA ↑</div>
+    </div>
+    <div id="hosp-list"><div style="text-align:center;padding:28px;color:var(--g400)">Loading...</div></div>
+    <button class="btn btn-red" id="dispatch-btn" style="display:none" onclick="confirmDispatch()">🚑 Confirm Dispatch →</button>
+  </div>
+  <div class="bnav">
+    <div class="bni active"><div class="bni-ico">🗺️</div>Map<div class="bni-dot"></div></div>
+    <div class="bni" onclick="goScreen('ambulance-alerts')"><div class="bni-ico">🔔</div>Alerts</div>
+    <div class="bni" onclick="goScreen('ambulance-profile')"><div class="bni-ico">👤</div>Profile</div>
+  </div>
+</div>
+
+<!-- ══════════ AMBULANCE — DETAIL ══════════ -->
+<div id="scr-ambulance-detail" class="screen">
+  <div class="det-hero">
+    <div class="det-back" onclick="goScreen('ambulance-map')">← Back to Map</div>
+    <div class="det-row">
+      <div class="det-ico" id="d-ico" style="background:#dcfce7">🏥</div>
+      <div><div class="det-name" id="d-name">Hospital</div><div class="det-sub" id="d-sub">—</div></div>
+    </div>
+    <div class="det-metrics">
+      <div class="det-metric"><div class="det-mn" id="d-dist">—</div><div class="det-ml">Distance</div></div>
+      <div class="det-metric"><div class="det-mn" id="d-eta">—</div><div class="det-ml">ETA</div></div>
+      <div class="det-metric hl"><div class="det-mn" id="d-beds">—</div><div class="det-ml">Emerg. Free</div></div>
+    </div>
+  </div>
+  <div class="scroll" style="padding-bottom:20px;">
+    <div class="card"><div class="card-title">Bed Availability</div><div id="d-bed-grid" style="display:flex;flex-direction:column;gap:7px"></div></div>
+    <div class="card"><div class="card-title">Services</div><div id="d-svcs"></div></div>
+    <div class="card">
+      <div class="card-title">Contact</div>
+      <div style="display:flex;flex-direction:column;gap:8px;font-size:.82rem">
+        <div style="display:flex;justify-content:space-between"><span style="color:var(--g500)">Emergency Line</span><span style="font-weight:900;color:var(--navy)" id="d-phone">—</span></div>
+        <div style="display:flex;justify-content:space-between"><span style="color:var(--g500)">Data updated</span><span style="font-weight:800;color:var(--green)" id="d-updated">—</span></div>
+      </div>
+    </div>
+    <div class="flex-row">
+      <button class="btn btn-blue f1" onclick="startNav()">🗺 Navigate</button>
+      <button class="btn btn-ghost" onclick="callHosp()" style="width:auto;padding:14px 20px">📞</button>
+    </div>
+    <button class="btn btn-red" onclick="confirmDispatch()">⚡ Confirm Dispatch Here</button>
+  </div>
+</div>
+
+<!-- ══════════ AMBULANCE — ALERTS ══════════ -->
+<div id="scr-ambulance-alerts" class="screen">
+  <div class="app-hdr"><div class="hdr-title">Notifications</div></div>
+  <div class="scroll"><div id="amb-alerts-list"><div style="text-align:center;padding:28px;color:var(--g400)">Loading...</div></div></div>
+  <div class="bnav">
+    <div class="bni" onclick="goScreen('ambulance-map')"><div class="bni-ico">🗺️</div>Map</div>
+    <div class="bni active"><div class="bni-ico">🔔</div>Alerts<div class="bni-dot"></div></div>
+    <div class="bni" onclick="goScreen('ambulance-profile')"><div class="bni-ico">👤</div>Profile</div>
+  </div>
+</div>
+
+<!-- ══════════ AMBULANCE — PROFILE ══════════ -->
+<div id="scr-ambulance-profile" class="screen">
+  <div class="prof-hdr"><div class="prof-ava">🚑</div><div class="prof-name" id="amb-name">Driver</div><div class="prof-role">Ambulance Driver</div></div>
+  <div class="scroll" style="padding-bottom:20px;">
+    <div class="card" style="padding:0;overflow:hidden">
+      <div class="set-item" onclick="goScreen('ambulance-map')"><div class="set-ico" style="background:#dbeafe">🗺️</div><div><div class="set-lbl">Hospital Map</div><div class="set-sub">Find nearest available</div></div><div class="set-arr">›</div></div>
+      <div class="dvd"></div>
+      <div class="set-item" onclick="goScreen('setup')"><div class="set-ico" style="background:#f1f5f9">⚙️</div><div><div class="set-lbl">App Settings</div><div class="set-sub">Backend configuration</div></div><div class="set-arr">›</div></div>
+    </div>
+    <button class="btn btn-ghost" onclick="doLogout()">🚪 Sign Out</button>
+  </div>
+  <div class="bnav">
+    <div class="bni" onclick="goScreen('ambulance-map')"><div class="bni-ico">🗺️</div>Map</div>
+    <div class="bni" onclick="goScreen('ambulance-alerts')"><div class="bni-ico">🔔</div>Alerts</div>
+    <div class="bni active"><div class="bni-ico">👤</div>Profile<div class="bni-dot"></div></div>
+  </div>
+</div>
+
+<!-- ══════════ ADMIN — HOME ══════════ -->
+<div id="scr-admin-home" class="screen">
+  <div class="app-hdr">
+    <div class="hdr-row"><div class="hdr-logo"><div class="hdr-dot">👩‍💼</div><div class="hdr-brand">Responda<em>Health</em></div></div><div class="hdr-right"><div class="live-badge"><div class="live-dot"></div>LIVE</div><div class="ava-btn" onclick="goScreen('admin-profile')">👤</div></div></div>
+    <div class="hdr-sub">National Emergency Coordination · Ghana</div>
+    <div class="hdr-title">Admin Dashboard</div>
+  </div>
+  <div class="scroll">
+    <div class="stat-grid">
+      <div class="stat-box"><div class="stat-n b" id="st-online">—</div><div class="stat-l">Hospitals Online</div></div>
+      <div class="stat-box"><div class="stat-n g" id="st-beds">—</div><div class="stat-l">Beds Available</div></div>
+      <div class="stat-box"><div class="stat-n r" id="st-full">—</div><div class="stat-l">At Capacity</div></div>
+      <div class="stat-box"><div class="stat-n a" id="st-stale">—</div><div class="stat-l">Stale &gt;6hrs</div></div>
+      <div class="stat-box"><div class="stat-n b" id="st-icu">—</div><div class="stat-l">ICU Free</div></div>
+      <div class="stat-box"><div class="stat-n r" id="st-ct">—</div><div class="stat-l">CT Offline</div></div>
+    </div>
+    <div class="card">
+      <div class="card-title">ICU Trend — 7 Days</div>
+      <div class="bchart" id="icu-chart">
+        <div class="bc-col"><div class="bc-wrap"><div class="bc-bar b" style="height:65%"></div></div><div class="bc-lbl">Mon</div></div>
+        <div class="bc-col"><div class="bc-wrap"><div class="bc-bar b" style="height:50%"></div></div><div class="bc-lbl">Tue</div></div>
+        <div class="bc-col"><div class="bc-wrap"><div class="bc-bar b" style="height:72%"></div></div><div class="bc-lbl">Wed</div></div>
+        <div class="bc-col"><div class="bc-wrap"><div class="bc-bar r" style="height:86%"></div></div><div class="bc-lbl">Thu</div></div>
+        <div class="bc-col"><div class="bc-wrap"><div class="bc-bar r" style="height:93%"></div></div><div class="bc-lbl">Fri</div></div>
+        <div class="bc-col"><div class="bc-wrap"><div class="bc-bar b" style="height:60%"></div></div><div class="bc-lbl">Sat</div></div>
+        <div class="bc-col"><div class="bc-wrap"><div class="bc-bar b" style="height:54%"></div></div><div class="bc-lbl">Today</div></div>
+      </div>
+      <div style="font-size:.65rem;color:var(--g400);margin-top:6px">Thu–Fri peak pattern detected</div>
+    </div>
+    <div class="card"><div class="card-title">🚨 Active Alerts</div><div id="adm-alerts"><div style="text-align:center;padding:14px;color:var(--g400)">Loading...</div></div><button class="btn btn-red mt12" onclick="sendSurge()">📣 Issue Regional Alert</button></div>
+    <div class="card" style="padding:0;overflow:hidden">
+      <div style="padding:12px 14px 8px"><div class="card-title" style="margin-bottom:0">All Hospitals</div></div>
+      <div style="overflow-x:auto"><table class="adm-tbl"><thead><tr><th>Hospital</th><th>Emerg.</th><th>ICU</th><th>CT</th><th>Updated</th></tr></thead><tbody id="adm-tbody"><tr><td colspan="5" style="text-align:center;padding:18px;color:var(--g400)">Loading...</td></tr></tbody></table></div>
+    </div>
+    <button class="btn btn-ghost" onclick="exportCSV()">📄 Export Report (CSV)</button>
+  </div>
+  <div class="bnav">
+    <div class="bni active"><div class="bni-ico">📊</div>Overview<div class="bni-dot"></div></div>
+    <div class="bni" onclick="goScreen('admin-hospitals')"><div class="bni-ico">🏥</div>Hospitals</div>
+    <div class="bni" onclick="goScreen('admin-alerts-view')"><div class="bni-ico">🚨</div>Alerts</div>
+    <div class="bni" onclick="goScreen('admin-profile')"><div class="bni-ico">👤</div>Profile</div>
+  </div>
+</div>
+
+<!-- ══════════ ADMIN — HOSPITALS ══════════ -->
+<div id="scr-admin-hospitals" class="screen">
+  <div class="app-hdr"><div class="hdr-row"><div class="hdr-title">Pilot Hospitals</div></div><div class="hdr-sub" id="adm-hosp-count">Loading...</div></div>
+  <div class="scroll"><div id="adm-hosp-list"><div style="text-align:center;padding:28px;color:var(--g400)">Loading...</div></div></div>
+  <div class="bnav">
+    <div class="bni" onclick="goScreen('admin-home')"><div class="bni-ico">📊</div>Overview</div>
+    <div class="bni active"><div class="bni-ico">🏥</div>Hospitals<div class="bni-dot"></div></div>
+    <div class="bni" onclick="goScreen('admin-alerts-view')"><div class="bni-ico">🚨</div>Alerts</div>
+    <div class="bni" onclick="goScreen('admin-profile')"><div class="bni-ico">👤</div>Profile</div>
+  </div>
+</div>
+
+<!-- ══════════ ADMIN — ALERTS VIEW ══════════ -->
+<div id="scr-admin-alerts-view" class="screen">
+  <div class="app-hdr"><div class="hdr-title">System Alerts</div></div>
+  <div class="scroll"><div id="adm-alerts-full"><div style="text-align:center;padding:28px;color:var(--g400)">Loading...</div></div></div>
+  <div class="bnav">
+    <div class="bni" onclick="goScreen('admin-home')"><div class="bni-ico">📊</div>Overview</div>
+    <div class="bni" onclick="goScreen('admin-hospitals')"><div class="bni-ico">🏥</div>Hospitals</div>
+    <div class="bni active"><div class="bni-ico">🚨</div>Alerts<div class="bni-dot"></div></div>
+    <div class="bni" onclick="goScreen('admin-profile')"><div class="bni-ico">👤</div>Profile</div>
+  </div>
+</div>
+
+<!-- ══════════ ADMIN — PROFILE ══════════ -->
+<div id="scr-admin-profile" class="screen">
+  <div class="prof-hdr"><div class="prof-ava">👩‍💼</div><div class="prof-name" id="adm-name">Administrator</div><div class="prof-role">Health Administrator</div><div class="prof-hosp">GHS / NHIA · Pilot Study</div></div>
+  <div class="scroll" style="padding-bottom:20px;">
+    <div class="card" style="padding:0;overflow:hidden">
+      <div class="set-item" onclick="goScreen('admin-home')"><div class="set-ico" style="background:#dbeafe">📊</div><div><div class="set-lbl">National Overview</div><div class="set-sub">Capacity &amp; alerts</div></div><div class="set-arr">›</div></div>
+      <div class="dvd"></div>
+      <div class="set-item" onclick="goScreen('admin-hospitals')"><div class="set-ico" style="background:#dcfce7">🏥</div><div><div class="set-lbl">Manage Hospitals</div><div class="set-sub">All pilot facilities</div></div><div class="set-arr">›</div></div>
+      <div class="dvd"></div>
+      <div class="set-item" onclick="goScreen('setup')"><div class="set-ico" style="background:#f1f5f9">⚙️</div><div><div class="set-lbl">App Settings</div><div class="set-sub">Backend configuration</div></div><div class="set-arr">›</div></div>
+    </div>
+    <button class="btn btn-ghost" onclick="doLogout()">🚪 Sign Out</button>
+  </div>
+  <div class="bnav">
+    <div class="bni" onclick="goScreen('admin-home')"><div class="bni-ico">📊</div>Overview</div>
+    <div class="bni" onclick="goScreen('admin-hospitals')"><div class="bni-ico">🏥</div>Hospitals</div>
+    <div class="bni" onclick="goScreen('admin-alerts-view')"><div class="bni-ico">🚨</div>Alerts</div>
+    <div class="bni active"><div class="bni-ico">👤</div>Profile<div class="bni-dot"></div></div>
+  </div>
+</div>
+
+</div><!-- #app -->
+
+<div id="loading"><div class="spinner"></div></div>
+<div id="toast"></div>
+
+<script>
+/* ═══════════════════════════════════════════════════════════
+   RESPONDAHEALTH — REAL-TIME EMERGENCY COORDINATION PLATFORM
+   Zero external scripts. Firebase via native fetch REST API.
+   Free Spark plan: no credits, no billing surprises ever.
+   10 Pilot Participants pre-seeded for demo mode.
+   ═══════════════════════════════════════════════════════════ */
+
+const CFG_KEY = 'responda_v4_firebase';
+// ── HARDCODED FIREBASE CONFIG — no setup screen needed ──
+const FIREBASE_CONFIG = {
+  apiKey: "AIzaSyDFs8TO_zY-Wo7CRVEnAFpyVickAPRksiM",
+  authDomain: "respondahealth.firebaseapp.com",
+  databaseURL: "https://respondahealth-default-rtdb.europe-west1.firebasedatabase.app",
+  projectId: "respondahealth"
+};
+let demoMode = false;
+let currentUser = null;
+let currentRole = null;
+let currentHospital = null;
+let currentRoleChoice = 'staff';
+let selectedHospId = null;
+let activeFilter = 'all';
+let stepVals = { emb:0, icu:0, gen:0, mat:0, ped:0 };
+let allHospitals = [];
+let fbIdToken = '';
+let fbLocalId = '';
+let pollTimer = null;
+let activeStream = null;
+
+// ── CONFIG ──
+function loadCfg(){ return FIREBASE_CONFIG; } // always returns hardcoded config
+function saveCfg(c){ try{ localStorage.setItem(CFG_KEY,JSON.stringify(c)); }catch(e){} }
+function saveSession(tok,uid,ref){ try{ localStorage.setItem('rsp_tok',tok); localStorage.setItem('rsp_uid',uid); localStorage.setItem('rsp_ref',ref||''); }catch(e){} }
+function loadSession(){ return{ tok:localStorage.getItem('rsp_tok')||'', uid:localStorage.getItem('rsp_uid')||'', ref:localStorage.getItem('rsp_ref')||'' }; }
+function clearSession(){ try{ ['rsp_tok','rsp_uid','rsp_ref'].forEach(k=>localStorage.removeItem(k)); }catch(e){} }
+
+// ── FIREBASE NATIVE REST CLIENT ──
+const FB = {
+  cfg:{},
+  init(c){ this.cfg=c; },
+
+  async signIn(email,password){
+    const r=await fetch(`https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=${this.cfg.apiKey}`,
+      {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email,password,returnSecureToken:true})});
+    const d=await r.json();
+    if(!r.ok) throw new Error(d.error?.message||'Login failed');
+    return d;
+  },
+
+  async signUp(email,password){
+    const r=await fetch(`https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=${this.cfg.apiKey}`,
+      {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email,password,returnSecureToken:true})});
+    const d=await r.json();
+    if(!r.ok) throw new Error(d.error?.message||'Registration failed');
+    return d;
+  },
+
+  async refreshToken(refreshToken){
+    const r=await fetch(`https://securetoken.googleapis.com/v1/token?key=${this.cfg.apiKey}`,
+      {method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:`grant_type=refresh_token&refresh_token=${refreshToken}`});
+    const d=await r.json();
+    if(!r.ok) throw new Error('Token refresh failed');
+    return{idToken:d.id_token,refreshToken:d.refresh_token,localId:d.user_id};
+  },
+
+  // Strip trailing slash once so all URLs are clean
+  dbUrl(){ return this.cfg.databaseURL.replace(/\/+$/, ''); },
+
+  async get(path){
+    const url=`${this.dbUrl()}/${path}.json?auth=${fbIdToken}`;
+    const r=await fetch(url);
+    if(!r.ok) throw new Error('DB read failed: '+r.status);
+    const d=await r.json();
+    return d; // Firebase returns JSON null for missing nodes — callers must handle
+  },
+
+  async set(path,data){
+    const url=`${this.dbUrl()}/${path}.json?auth=${fbIdToken}`;
+    const r=await fetch(url,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)});
+    if(!r.ok) throw new Error('DB write failed: '+r.status);
+    return r.json();
+  },
+
+  async patch(path,data){
+    const url=`${this.dbUrl()}/${path}.json?auth=${fbIdToken}`;
+    const r=await fetch(url,{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)});
+    if(!r.ok) throw new Error('DB patch failed: '+r.status);
+    return r.json();
+  },
+
+  async push(path,data){
+    const url=`${this.dbUrl()}/${path}.json?auth=${fbIdToken}`;
+    const r=await fetch(url,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)});
+    if(!r.ok) throw new Error('DB push failed: '+r.status);
+    return r.json();
+  },
+
+  async getProfile(uid){
+    const profile = await this.get(`users/${uid}`);
+    if(!profile) console.warn('Profile null for uid:', uid);
+    return profile;
+  },
+
+  async getHospitals(){
+    const data=await this.get('hospitals');
+    if(!data) return[];
+    return Object.entries(data).map(([id,h])=>({id,...h}));
+  },
+
+  // ── REAL-TIME via Firebase SSE ──
+  // Firebase Realtime DB natively supports Server-Sent Events.
+  // Appending ?accept=text/event-stream opens a persistent HTTP
+  // connection. Firebase pushes a "put" event to ALL connected clients
+  // the instant any data changes — true cross-device live sync.
+  startStream(path, callback){
+    this.stopStream();
+    if(!this.cfg.databaseURL || !fbIdToken) return;
+
+    const buildUrl = () =>
+      this.dbUrl() + '/' + path + '.json'
+      + '?auth=' + fbIdToken;
+
+    const connect = () => {
+      try {
+        const es = new EventSource(buildUrl());
+        activeStream = es;
+
+        es.addEventListener('put', e => {
+          try {
+            const msg = JSON.parse(e.data);
+            // path '/' = full snapshot on connect; sub-paths = single node changes
+            if (msg && msg.data !== null) callback(msg.data, msg.path || '/');
+          } catch(_) {}
+        });
+
+        es.addEventListener('patch', e => {
+          try {
+            const msg = JSON.parse(e.data);
+            if (msg && msg.data) callback(msg.data, msg.path || '/');
+          } catch(_) {}
+        });
+
+        // cancel-event means auth token expired — refresh and reconnect
+        es.addEventListener('cancel', () => {
+          es.close(); activeStream = null;
+          setTimeout(connect, 3000);
+        });
+
+        es.onerror = () => {
+          es.close(); activeStream = null;
+          // Reconnect after 4s — handles brief network drops
+          setTimeout(connect, 4000);
+        };
+
+      } catch(e) {
+        // Fallback for very old browsers: poll every 5s
+        pollTimer = setInterval(async () => {
+          try { const d = await this.get(path); if(d) callback(d, '/'); } catch(_){}
+        }, 5000);
+      }
+    };
+
+    connect();
+  },
+
+  stopStream(){
+    if(activeStream){ activeStream.close(); activeStream = null; }
+    if(pollTimer){ clearInterval(pollTimer); pollTimer = null; }
+  },
+
+  stopPolling(){ this.stopStream(); }
+};
+
+// ── 5 PILOT HOSPITALS ──
+const DEMO_HOSPITALS=[
+  {id:'KORLEBU',name:'Korle Bu Teaching Hospital',region:'Greater Accra',district:'Ablekuma South',level:3,phone:'030 2670422',lat:5.5402,lng:-0.2280,beds_emergency_available:14,beds_emergency_total:40,beds_icu_available:3,beds_icu_total:12,beds_general_available:0,beds_general_total:120,beds_maternity_available:8,beds_maternity_total:30,beds_paediatric_available:5,beds_paediatric_total:20,ct_scan:'operational',mri:'maintenance',blood_bank:'low_stock',oxygen:'adequate',oxygen_level:78,theatre:'operational',generator:'operational',blood_oneg:4,blood_opos:22,blood_apos:18,blood_bpos:14,notes:'MRI back ~18:00. O-neg low.',last_updated:new Date(Date.now()-2*3600000).toISOString(),updated_by_name:'Nurse Ama Osei'},
+  {id:'MILITARY37',name:'37 Military Hospital',region:'Greater Accra',district:'Liberation Rd',level:2,phone:'030 2776111',lat:5.5620,lng:-0.1980,beds_emergency_available:8,beds_emergency_total:35,beds_icu_available:2,beds_icu_total:8,beds_general_available:12,beds_general_total:80,beds_maternity_available:4,beds_maternity_total:15,beds_paediatric_available:6,beds_paediatric_total:18,ct_scan:'operational',mri:'operational',blood_bank:'operational',oxygen:'adequate',oxygen_level:85,theatre:'operational',generator:'operational',blood_oneg:12,blood_opos:30,blood_apos:25,blood_bpos:20,notes:'',last_updated:new Date(Date.now()-45*60000).toISOString(),updated_by_name:'Dr. Kofi Boateng'},
+  {id:'RIDGE',name:'Ridge Hospital',region:'Greater Accra',district:'Ridge',level:2,phone:'030 2666940',lat:5.5595,lng:-0.1860,beds_emergency_available:0,beds_emergency_total:30,beds_icu_available:0,beds_icu_total:6,beds_general_available:0,beds_general_total:60,beds_maternity_available:2,beds_maternity_total:20,beds_paediatric_available:0,beds_paediatric_total:12,ct_scan:'offline',mri:'offline',blood_bank:'low_stock',oxygen:'low',oxygen_level:35,theatre:'operational',generator:'maintenance',blood_oneg:0,blood_opos:5,blood_apos:8,blood_bpos:6,notes:'CT down. Full capacity.',last_updated:new Date(Date.now()-30*60000).toISOString(),updated_by_name:'Admin Ridge'},
+  {id:'TEMAGEH',name:'Tema General Hospital',region:'Greater Accra',district:'Tema',level:2,phone:'030 3202500',lat:5.6698,lng:-0.0167,beds_emergency_available:22,beds_emergency_total:45,beds_icu_available:5,beds_icu_total:10,beds_general_available:35,beds_general_total:100,beds_maternity_available:12,beds_maternity_total:25,beds_paediatric_available:8,beds_paediatric_total:20,ct_scan:'operational',mri:'operational',blood_bank:'operational',oxygen:'adequate',oxygen_level:90,theatre:'operational',generator:'operational',blood_oneg:18,blood_opos:35,blood_apos:28,blood_bpos:22,notes:'',last_updated:new Date(Date.now()-3600000).toISOString(),updated_by_name:'Sr. Mansa Tetteh'},
+  {id:'KATH',name:'Komfo Anokye Teaching Hospital',region:'Ashanti',district:'Kumasi',level:3,phone:'032 2022301',lat:6.6885,lng:-1.6244,beds_emergency_available:19,beds_emergency_total:50,beds_icu_available:7,beds_icu_total:15,beds_general_available:28,beds_general_total:150,beds_maternity_available:15,beds_maternity_total:40,beds_paediatric_available:10,beds_paediatric_total:30,ct_scan:'operational',mri:'operational',blood_bank:'operational',oxygen:'adequate',oxygen_level:88,theatre:'operational',generator:'operational',blood_oneg:20,blood_opos:40,blood_apos:35,blood_bpos:28,notes:'',last_updated:new Date(Date.now()-3*3600000).toISOString(),updated_by_name:'Dr. Yaw Asante'}
+];
+
+// ── 10 PILOT PARTICIPANTS ──
+const DEMO_USERS={
+  'ama.osei@korlebu.gh':       {password:'Responda@2024!',full_name:'Ama Osei',      role:'staff',    hospital:'KORLEBU',   staff_id:'PILOT-001'},
+  'kofi.boateng@military.gh':  {password:'Responda@2024!',full_name:'Kofi Boateng',  role:'staff',    hospital:'MILITARY37',staff_id:'PILOT-002'},
+  'mansa.tetteh@tema.gh':      {password:'Responda@2024!',full_name:'Mansa Tetteh',  role:'staff',    hospital:'TEMAGEH',   staff_id:'PILOT-003'},
+  'abena.ridge@ridge.gh':      {password:'Responda@2024!',full_name:'Abena Mensah',  role:'staff',    hospital:'RIDGE',     staff_id:'PILOT-004'},
+  'yaw.asante@kath.gh':        {password:'Responda@2024!',full_name:'Yaw Asante',    role:'staff',    hospital:'KATH',      staff_id:'PILOT-005'},
+  'yaw.mensah@ambulance.gh':   {password:'Responda@2024!',full_name:'Yaw Mensah',    role:'ambulance',vehicle_id:'GA-2847', staff_id:'PILOT-006'},
+  'kweku.driver@ambulance.gh': {password:'Responda@2024!',full_name:'Kweku Darko',   role:'ambulance',vehicle_id:'GA-1234', staff_id:'PILOT-007'},
+  'abena.asante@ghs.gh':       {password:'Responda@2024!',full_name:'Abena Asante',  role:'admin',    staff_id:'PILOT-008'},
+  'kwame.darko@ghs.gh':        {password:'Responda@2024!',full_name:'Kwame Darko',   role:'admin',    staff_id:'PILOT-009'},
+  'nana.adjei@nhia.gh':        {password:'Responda@2024!',full_name:'Nana Adjei',    role:'admin',    staff_id:'PILOT-010'}
+};
+
+// ── HELPERS ──
+function bedCls(a,t){if(!t)return'r';const p=a/t;return p>0.3?'g':p>0.1?'a':'r';}
+function svcCls(s){if(s==='operational'||s==='adequate')return'g';if(s==='maintenance'||s==='low_stock'||s==='low')return'a';return'r';}
+function svcLbl(s){const m={'operational':'● Online','adequate':'● Adequate','maintenance':'⚙ Maintenance','low_stock':'⚠ Low Stock','low':'⚠ Low','offline':'✗ Offline'};return m[s]||s||'—';}
+function timeAgo(iso){if(!iso)return'Never';const m=Math.floor((Date.now()-new Date(iso))/60000);if(m<1)return'Just now';if(m<60)return m+'m ago';const h=Math.floor(m/60);if(h<24)return h+'h ago';return Math.floor(h/24)+'d ago';}
+function staleHrs(iso){if(!iso)return 999;return(Date.now()-new Date(iso))/3600000;}
+const MY_LAT=5.56,MY_LNG=-0.205;
+function dist(h){const R=6371,dLa=(h.lat-MY_LAT)*Math.PI/180,dLn=(h.lng-MY_LNG)*Math.PI/180,a=Math.sin(dLa/2)**2+Math.cos(MY_LAT*Math.PI/180)*Math.cos(h.lat*Math.PI/180)*Math.sin(dLn/2)**2;return R*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a));}
+function eta(h){return Math.round(dist(h)*2.2+3);}
+function withTO(p,ms,fb){return Promise.race([p,new Promise(r=>setTimeout(()=>r(fb),ms))]);}
+
+let _tt;
+function toast(msg,ms=3200){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');clearTimeout(_tt);_tt=setTimeout(()=>t.classList.remove('show'),ms);}
+function setLoad(on){document.getElementById('loading').classList.toggle('show',on);}
+
+// ── SCREEN NAV ──
+function goScreen(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  const el=document.getElementById('scr-'+id);
+  if(!el){console.error('Screen not found: scr-'+id);return;}
+  el.classList.add('active');
+  const loaders={'login':updateConnStatus,'hospital-home':loadHospHome,'hospital-update':loadUpdateForm,'hospital-alerts':()=>loadAlerts('h-alerts-list'),'ambulance-map':loadAmbMap,'ambulance-alerts':()=>loadAlerts('amb-alerts-list'),'admin-home':loadAdminHome,'admin-hospitals':loadAdminHospitals,'admin-alerts-view':loadAdminAlertsView};
+  if(loaders[id]) loaders[id]();
+}
+
+// ── CONN STATUS ──
+function updateConnStatus(){
+  const el=document.getElementById('conn-status');
+  if(!el) return;
+  if(demoMode){
+    el.style.cssText='background:#fef3c7;color:#92400e;border-radius:8px;padding:9px 12px;text-align:center;font-size:.68rem';
+    el.textContent='🎭 Demo mode — 10 participants pre-loaded';
+  }else{
+    el.style.cssText='background:#f0fdf4;color:#166534;border-radius:8px;padding:9px 12px;text-align:center;font-size:.68rem';
+    el.innerHTML='🟢 Firebase: <strong>respondahealth</strong> · Live · Connected';
+  }
+}
+
+// ── SETUP ──
+function saveConfig(){
+  const apiKey=document.getElementById('cfg-apikey').value.trim();
+  const projectId=document.getElementById('cfg-projectid').value.trim();
+  const authDomain=document.getElementById('cfg-authdomain').value.trim();
+  const databaseURL=document.getElementById('cfg-dburl').value.trim();
+  if(!apiKey||!projectId||!databaseURL){toast('⚠️ Fill in all fields');return;}
+  if(!databaseURL.startsWith('https://')){toast('⚠️ Database URL must start with https://');return;}
+  const cfg={apiKey,projectId,authDomain,databaseURL};
+  saveCfg(cfg);
+  FB.init(cfg);
+  demoMode=false;
+  toast('🔥 Firebase connected!');
+  setTimeout(()=>goScreen('login'),900);
+}
+
+function useDemoMode(){
+  demoMode=true;
+  allHospitals=JSON.parse(JSON.stringify(DEMO_HOSPITALS));
+  toast('🎭 Demo mode — all 10 participants ready');
+  goScreen('login');
+}
+
+// ── SPLASH INIT ──
+function skipSplash(){clearTimeout(_splashTO);runInit();}
+let _splashTO;
+
+async function runInit(){
+  if(!document.getElementById('scr-splash').classList.contains('active')) return;
+  try{
+    const cfg=loadCfg(); // always returns hardcoded FIREBASE_CONFIG
+    demoMode=false;
+    FB.init(cfg);
+    const sess=loadSession();
+    if(!sess.tok||!sess.uid){goScreen('login');return;}
+    fbIdToken=sess.tok; fbLocalId=sess.uid;
+    if(sess.ref){
+      try{
+        const refreshed=await withTO(FB.refreshToken(sess.ref),5000,null);
+        if(refreshed){fbIdToken=refreshed.idToken;fbLocalId=refreshed.localId;saveSession(fbIdToken,fbLocalId,refreshed.refreshToken);}
+      }catch(e){}
+    }
+    const profile=await withTO(FB.getProfile(fbLocalId),10000,null);
+    if(!profile){goScreen('login');return;}
+    routeByProfile(profile);
+  }catch(e){console.warn('Init:',e.message);goScreen('login');}
+}
+_splashTO=setTimeout(runInit,2400);
+
+// ── ROLE SELECT ──
+function selRole(r){
+  currentRoleChoice=r;
+  ['staff','ambulance','admin'].forEach(x=>{
+    const el=document.getElementById('rc-'+x);
+    if(el) el.classList.toggle('active',x===r);
+  });
+}
+
+// ── LOGIN ──
+async function doLogin(){
+  const email=document.getElementById('l-email').value.trim().toLowerCase();
+  const pass=document.getElementById('l-pass').value;
+  if(!email||!pass){toast('⚠️ Enter email and password');return;}
+
+  // Firebase always configured — re-init to be safe, disable demo mode
+  demoMode = false;
+  FB.init(FIREBASE_CONFIG);
+
+  setLoad(true);
+  try{
+    const data=await withTO(FB.signIn(email,pass),8000,null);
+    if(!data) throw new Error('Connection timed out. Check your internet.');
+    fbIdToken=data.idToken; fbLocalId=data.localId;
+    saveSession(fbIdToken,fbLocalId,data.refreshToken);
+    currentUser={uid:fbLocalId,email:data.email};
+    const profile=await withTO(FB.getProfile(fbLocalId),10000,null);
+    if(!profile){
+      const shortUid = fbLocalId ? fbLocalId.substring(0,8)+'...' : 'unknown';
+      toast('⚠️ No profile for UID: '+shortUid+' — check users node in Firebase DB');
+      console.error('No profile found. UID:', fbLocalId, '— check Realtime Database users/'+fbLocalId);
+      clearSession();return;
+    }
+    routeByProfile(profile);
+  }catch(e){
+    const m=e.message||'';
+    if(m.includes('EMAIL_NOT_FOUND')||m.includes('INVALID_PASSWORD')||m.includes('INVALID_LOGIN_CREDENTIALS')) toast('❌ Wrong email or password');
+    else if(m.includes('TOO_MANY_ATTEMPTS')) toast('❌ Too many attempts. Try again later.');
+    else if(m.includes('timed out')||m.includes('fetch')) toast('❌ Network error — check internet connection');
+    else if(m.includes('API key')||m.includes('INVALID_API_KEY')) toast('❌ Invalid API Key — recheck Firebase config');
+    else toast('❌ '+m);
+    console.error('Login error full:', m);
+  }finally{setLoad(false);}
+}
+
+function routeByProfile(profile){
+  currentRole=profile.role;
+  if(profile.role==='staff'){
+    // When Firebase is active, don't pre-load from demo — hospital data will come from SSE stream
+    let h = allHospitals.find(x=>x.id===profile.hospital);
+    if(!h){ h = DEMO_HOSPITALS.find(x=>x.id===profile.hospital)||DEMO_HOSPITALS[0]; }
+    currentHospital = {...h}; // use a copy so Firebase updates don't get blocked
+    document.getElementById('hh-name').textContent=currentHospital.name;
+    document.getElementById('p-name').textContent=profile.full_name||'Staff';
+    document.getElementById('p-hosp').textContent=currentHospital.name;
+    goScreen('hospital-home');
+  }else if(profile.role==='ambulance'){
+    document.getElementById('amb-name').textContent=profile.full_name||'Driver';
+    goScreen('ambulance-map');
+  }else if(profile.role==='admin'){
+    document.getElementById('adm-name').textContent=profile.full_name||'Administrator';
+    goScreen('admin-home');
+  }else{
+    toast('⚠️ Unknown role — contact administrator');
+    goScreen('login');
+  }
+}
+
+function emergencyAccess(){
+  demoMode=true; currentRole='ambulance';
+  allHospitals=JSON.parse(JSON.stringify(DEMO_HOSPITALS));
+  toast('🚨 Emergency access — demo mode');
+  document.getElementById('amb-name').textContent='Emergency Access';
+  goScreen('ambulance-map');
+}
+
+function doLogout(){
+  FB.stopStream(); clearSession();
+  currentUser=null;currentRole=null;currentHospital=null;
+  fbIdToken='';fbLocalId='';demoMode=false;allHospitals=[];
+  goScreen('login');
+}
+
+// ── REGISTER ──
+function regRoleChanged(){
+  const r=document.getElementById('r-role').value;
+  const grp=document.getElementById('r-hosp-grp');
+  if(grp) grp.style.display=(r==='ambulance'||r==='admin')?'none':'block';
+}
+
+async function doRegister(){
+  const name=document.getElementById('r-name').value.trim();
+  const email=document.getElementById('r-email').value.trim();
+  const phone=document.getElementById('r-phone').value.trim();
+  const sid=document.getElementById('r-staffid').value.trim();
+  const role=document.getElementById('r-role').value;
+  const hosp=document.getElementById('r-hospital')?.value||'';
+  const pass=document.getElementById('r-pass').value;
+  const pass2=document.getElementById('r-pass2').value;
+  if(!name||!email||!pass){toast('⚠️ Fill all required fields');return;}
+  if(pass!==pass2){toast('⚠️ Passwords do not match');return;}
+  if(pass.length<8){toast('⚠️ Password must be 8+ characters');return;}
+  if(demoMode){toast('✅ Demo: Use the pre-set participant logins instead.');return;}
+  setLoad(true);
+  try{
+    const data=await withTO(FB.signUp(email,pass),8000,null);
+    if(!data) throw new Error('Timed out');
+    fbIdToken=data.idToken; fbLocalId=data.localId;
+    const profile={full_name:name,phone,staff_id:sid,role,email};
+    if(role==='staff') profile.hospital=hosp;
+    if(role==='ambulance') profile.vehicle_id=sid;
+    await withTO(FB.set(`users/${fbLocalId}`,profile),5000,null);
+    toast('✅ Account created! You can now sign in.');
+    goScreen('login');
+  }catch(e){toast('❌ '+e.message);}
+  finally{setLoad(false);}
+}
+
+// ── HOSPITAL HOME ──
+async function loadHospHome(){
+  let h=currentHospital;
+  if(!demoMode&&h?.id){
+    try{
+      const data=await withTO(FB.get(`hospitals/${h.id}`),5000,null);
+      if(data){h={id:h.id,...data};currentHospital=h;}
+    }catch(e){}
+  }
+  if(!h) h=DEMO_HOSPITALS[0];
+  document.getElementById('hh-name').textContent=h.name;
+  const sh=staleHrs(h.last_updated);
+  const sa=document.getElementById('hh-stale');
+  if(sh>4){sa.style.display='flex';document.getElementById('hh-stale-body').textContent=`Data is ${Math.floor(sh)} hours old. Please update.`;}
+  else sa.style.display='none';
+  const beds=[
+    {l:'🛏 Emergency',a:h.beds_emergency_available,t:h.beds_emergency_total},
+    {l:'🫁 ICU',a:h.beds_icu_available,t:h.beds_icu_total},
+    {l:'🏥 General',a:h.beds_general_available,t:h.beds_general_total},
+    {l:'👶 Maternity',a:h.beds_maternity_available,t:h.beds_maternity_total},
+    {l:'👦 Paediatric',a:h.beds_paediatric_available,t:h.beds_paediatric_total}
+  ];
+  document.getElementById('hh-beds').innerHTML=beds.map((b,i)=>{
+    const c=bedCls(b.a,b.t),pct=b.t?Math.round((1-b.a/b.t)*100):0,last=i===beds.length-1;
+    const col=c==='g'?'var(--green)':c==='a'?'var(--amber)':'var(--red)';
+    return`<div class="bed-item"${last?' style="border:none;margin:0;padding:0"':''}>
+      <div class="bed-hdr"><span class="bed-name">${b.l}</span><span class="bed-num" style="color:${col}">${b.a}<span class="bed-total"> / ${b.t}</span></span></div>
+      <div class="meter"><div class="mf ${c}" style="width:${pct}%"></div></div>
+      <div class="bed-foot"><span>${pct}% occupied</span><span style="color:${col};font-weight:800">${b.a===0?'FULL':b.a+' free'}</span></div>
+    </div>`;
+  }).join('');
+  const svcs=[
+    {ico:'🩻',bg:'#fef3c7',n:'CT Scan',s:h.ct_scan,sub:'Radiology'},
+    {ico:'🔬',bg:'#f1f5f9',n:'MRI Scanner',s:h.mri,sub:'Imaging'},
+    {ico:'🩸',bg:'#dbeafe',n:'Blood Bank',s:h.blood_bank,sub:h.blood_oneg<=4?'⚠ O-neg low':'Stocked'},
+    {ico:'💨',bg:'#dcfce7',n:'Oxygen',s:h.oxygen,sub:(h.oxygen_level||'?')+'% level'},
+    {ico:'🔪',bg:'#f0fdf4',n:'Theatre / OR',s:h.theatre,sub:'Operating room'},
+    {ico:'⚡',bg:'#fefce8',n:'Generator',s:h.generator,sub:'Backup power'}
+  ];
+  document.getElementById('hh-svcs').innerHTML=svcs.map((s,i)=>`
+    <div class="svc-row"${i===svcs.length-1?' style="border:none"':''}>
+      <div class="svc-l"><div class="svc-ico" style="background:${s.bg}">${s.ico}</div><div><div class="svc-name">${s.n}</div><div class="svc-sub">${s.sub}</div></div></div>
+      <span class="chip c${svcCls(s.s)}">${svcLbl(s.s)}</span>
+    </div>`).join('');
+  if(!demoMode&&h.id){
+    FB.startStream(`hospitals/${h.id}`,(data)=>{currentHospital={id:h.id,...data};loadHospHome();toast('🔄 Live update received');});
+  }
+}
+
+// ── UPDATE FORM ──
+function loadUpdateForm(){
+  const h=currentHospital||DEMO_HOSPITALS[0];
+  stepVals={emb:h.beds_emergency_available||0,icu:h.beds_icu_available||0,gen:h.beds_general_available||0,mat:h.beds_maternity_available||0,ped:h.beds_paediatric_available||0};
+  Object.entries(stepVals).forEach(([k,v])=>{const el=document.getElementById('sv-'+k);if(el)el.textContent=v;});
+  const togMap={'tog-ct':'ct_scan','tog-mri':'mri','tog-blood':'blood_bank','tog-o2':'oxygen','tog-theatre':'theatre','tog-power':'generator'};
+  Object.entries(togMap).forEach(([id,key])=>{
+    const el=document.getElementById(id);if(!el)return;
+    const v=h[key];
+    el.className='tog '+(v==='operational'||v==='adequate'?'on':v==='maintenance'||v==='low_stock'||v==='low'?'warn':'off');
+  });
+  document.getElementById('b-oneg').value=h.blood_oneg||'';
+  document.getElementById('b-opos').value=h.blood_opos||'';
+  document.getElementById('b-apos').value=h.blood_apos||'';
+  document.getElementById('b-bpos').value=h.blood_bpos||'';
+  document.getElementById('o2-lvl').value=h.oxygen_level||'';
+  document.getElementById('upd-notes').value=h.notes||'';
+  document.getElementById('upd-last').textContent='Last update: '+timeAgo(h.last_updated);
+  document.getElementById('upd-attr').textContent=`Last updated: ${timeAgo(h.last_updated)} · by ${h.updated_by_name||'Unknown'}`;
+}
+
+function step(k,d){stepVals[k]=Math.max(0,(stepVals[k]||0)+d);document.getElementById('sv-'+k).textContent=stepVals[k];}
+function cycleTog(el){if(el.classList.contains('on')){el.className='tog warn';toast('⚙ Maintenance / Low');}else if(el.classList.contains('warn')){el.className='tog off';toast('✗ Offline');}else{el.className='tog on';toast('✅ Operational');}}
+function togVal(id){const el=document.getElementById(id);return el.classList.contains('on')?'operational':el.classList.contains('warn')?'maintenance':'offline';}
+
+async function publishUpdate(){
+  const h=currentHospital||DEMO_HOSPITALS[0];
+  const upd={
+    beds_emergency_available:stepVals.emb,beds_icu_available:stepVals.icu,
+    beds_general_available:stepVals.gen,beds_maternity_available:stepVals.mat,beds_paediatric_available:stepVals.ped,
+    ct_scan:togVal('tog-ct'),mri:togVal('tog-mri'),blood_bank:togVal('tog-blood'),
+    oxygen:togVal('tog-o2'),theatre:togVal('tog-theatre'),generator:togVal('tog-power'),
+    blood_oneg:parseInt(document.getElementById('b-oneg').value)||0,
+    blood_opos:parseInt(document.getElementById('b-opos').value)||0,
+    blood_apos:parseInt(document.getElementById('b-apos').value)||0,
+    blood_bpos:parseInt(document.getElementById('b-bpos').value)||0,
+    oxygen_level:parseInt(document.getElementById('o2-lvl').value)||0,
+    notes:document.getElementById('upd-notes').value,
+    last_updated:new Date().toISOString(),
+    updated_by_name:currentUser?.email||'Staff'
+  };
+  if(demoMode){
+    // Only block publish in explicit demo mode
+    Object.assign(currentHospital||DEMO_HOSPITALS[0],upd);
+    const idx=allHospitals.findIndex(x=>x.id===h.id);
+    if(idx>=0) Object.assign(allHospitals[idx],upd);
+    toast('✅ Published! (Demo mode)');
+    goScreen('hospital-home');return;
+  }
+  setLoad(true);
+  try{
+    await withTO(FB.patch(`hospitals/${h.id}`,upd),8000,null);
+    await withTO(FB.push(`update_log/${h.id}`,{uid:fbLocalId,email:currentUser?.email,ts:upd.last_updated,data:upd}),3000,null).catch(()=>{});
+    Object.assign(currentHospital,upd);
+    toast('✅ Published to Firebase! All ambulances updated live.');
+    goScreen('hospital-home');
+  }catch(e){toast('❌ Update failed: '+e.message);}
+  finally{setLoad(false);}
+}
+
+// ── ALERTS ──
+function loadAlerts(containerId){
+  const h=currentHospital||allHospitals[0]||DEMO_HOSPITALS[0];
+  const items=[];
+  if(staleHrs(h?.last_updated)>4) items.push({c:'a',ico:'⚠️',t:'Update Required',b:`${h?.name||'Hospital'} data is ${Math.floor(staleHrs(h?.last_updated))} hours old.`,time:'Now',unread:true});
+  if((h?.blood_oneg||0)<=4) items.push({c:'r',ico:'🩸',t:'O-Neg Blood Critical',b:'Critically low. Request NHIA supply transfer.',time:'2h ago',unread:true});
+  items.push({c:'g',ico:'🔥',t:'Firebase Connected',b:'Free tier — no credits needed. Real-time sync across all 10 pilot participants.',time:'Today',unread:false});
+  items.push({c:'b',ico:'📡',t:'System Online',b:'RespondaHealth — Emergency Coordination Network active.',time:'Today',unread:false});
+  const html=items.map(a=>`<div class="nitem"><div class="nitem-ico ${a.c}">${a.ico}</div><div style="flex:1"><div class="nitem-title">${a.t}</div><div class="nitem-body">${a.b}</div><div class="nitem-time">${a.time}</div></div>${a.unread?'<div class="nitem-dot"></div>':''}</div>`).join('');
+  const el=document.getElementById(containerId);if(el) el.innerHTML=`<div class="card">${html}</div>`;
+  const badge=document.getElementById('notif-badge');if(badge) badge.textContent=items.filter(a=>a.unread).length;
+}
+
+// ── AMBULANCE MAP ──
+async function loadAmbMap(){
+  if(!demoMode){
+    try{
+      const data=await withTO(FB.getHospitals(),6000,null);
+      if(data&&data.length) allHospitals=data;
+      FB.startStream('hospitals',(data)=>{
+        if(data && typeof data === 'object'){
+          // SSE initial 'put' gives full snapshot; 'patch' gives single hospital object
+          if(Object.values(data)[0] && typeof Object.values(data)[0] === 'object' && Object.values(data)[0].name){
+            allHospitals=Object.entries(data).map(([id,h])=>({id,...h}));
+          } else {
+            // single hospital update — merge into allHospitals
+            const key=Object.keys(data)[0];
+            const idx=allHospitals.findIndex(x=>x.id===key);
+            if(idx>=0) Object.assign(allHospitals[idx],data[key]);
+            else allHospitals.push({id:key,...data[key]});
+          }
+        }
+        renderHospList(allHospitals);renderPins(allHospitals);
+        toast('🔄 Hospital data updated live');
+      });
+    }catch(e){console.warn('Hospital load:',e.message);}
+  }
+  if(!allHospitals.length) allHospitals=JSON.parse(JSON.stringify(DEMO_HOSPITALS));
+  renderHospList(allHospitals);renderPins(allHospitals);
+}
+
+function hospScore(h){const b=h.beds_emergency_available||0,d=dist(h)||0.1;let s=20;if(activeFilter==='icu'&&h.beds_icu_available>0)s=40;else if(activeFilter==='ct'&&h.ct_scan==='operational')s=40;else if(activeFilter==='blood'&&h.blood_bank==='operational')s=40;else if(activeFilter==='theatre'&&h.theatre==='operational')s=40;else if(activeFilter==='maternity'&&h.beds_maternity_available>0)s=40;return b*0.4+s+(1/d)*0.2;}
+function filterH(hosps){if(activeFilter==='all')return hosps;return hosps.filter(h=>{if(activeFilter==='icu')return h.beds_icu_available>0;if(activeFilter==='ct')return h.ct_scan==='operational';if(activeFilter==='blood')return h.blood_bank==='operational';if(activeFilter==='theatre')return h.theatre==='operational';if(activeFilter==='maternity')return h.beds_maternity_available>0;return true;});}
+
+function renderHospList(hosps){
+  const match=filterH(hosps),sorted=[...match].sort((a,b)=>hospScore(b)-hospScore(a)),dim=hosps.filter(h=>!match.includes(h));
+  const lbl=document.getElementById('hosp-lbl');if(lbl)lbl.textContent=`Available (${match.length} match${match.length!==1?'es':''})`;
+  const rows=[...sorted.map((h,i)=>hospRow(h,i===0&&match.length>0,false)),...dim.map(h=>hospRow(h,false,true))];
+  document.getElementById('hosp-list').innerHTML=rows.join('')||'<div style="text-align:center;padding:28px;color:var(--g400)">No hospitals match filter</div>';
+}
+
+function hospRow(h,best,dim){
+  const d=dist(h).toFixed(1),e=eta(h),b=h.beds_emergency_available||0;
+  const c=bedCls(b,h.beds_emergency_total||1),avaBg=c==='g'?'#dcfce7':c==='a'?'#fef3c7':'#fee2e2',col=c==='g'?'var(--green)':c==='a'?'var(--amber)':'var(--red)';
+  const mt=best?' style="margin-top:14px"':'';
+  return`<div class="hi${dim?' dim':''}${best?' sel':''}" onclick="selHosp('${h.id}')">
+    ${best?'<div class="best-tag">★ BEST MATCH</div>':''}
+    <div class="hi-ava"${mt} style="background:${avaBg}">🏥</div>
+    <div style="flex:1;min-width:0"${mt}><div class="hi-name">${h.name}</div><div class="hi-meta">📍 ${d} km · Est. ${e} min</div>
+    <div class="hi-chips"><span class="chip c${svcCls(h.ct_scan)}">🩻 CT ${h.ct_scan==='operational'?'✓':'✗'}</span><span class="chip c${h.beds_icu_available>0?'g':'r'}">🫁 ICU:${h.beds_icu_available||0}</span><span class="chip c${svcCls(h.blood_bank)}">🩸 ${h.blood_bank==='operational'?'Blood OK':'Blood Low'}</span></div></div>
+    <div class="hi-r"${mt}><div class="hi-n" style="color:${col}">${b}</div><div class="hi-l">${b===0?'FULL':'emerg'}</div></div>
+  </div>`;
+}
+
+function renderPins(hosps){
+  const pos=[{top:'6%',left:'13%'},{top:'40%',left:'58%'},{top:'63%',left:'10%'},{top:'10%',right:'8%'},{top:'72%',right:'14%'}];
+  document.getElementById('map-pins').innerHTML=hosps.slice(0,5).map((h,i)=>{
+    const p=pos[i]||{top:(10+i*14)+'%',left:'10%'},b=h.beds_emergency_available||0;
+    const c=b===0?'r':bedCls(b,h.beds_emergency_total||1),ps=Object.entries(p).map(([k,v])=>k+':'+v).join(';');
+    const nm=h.name.replace('Teaching Hospital','TH').replace('General Hospital','Gen').replace(' Hospital','');
+    return`<div class="pin" style="${ps}" onclick="selHosp('${h.id}')"><div class="pin-bbl ${c}">${nm} · ${b}</div><div class="pin-dot ${c}"></div></div>`;
+  }).join('');
+}
+
+function selHosp(id){
+  selectedHospId=id;
+  const h=(allHospitals.length?allHospitals:DEMO_HOSPITALS).find(x=>x.id===id);if(!h)return;
+  const btn=document.getElementById('dispatch-btn');if(btn){btn.style.display='flex';btn.textContent=`🚑 Dispatch to ${h.name} →`;}
+  loadDetail(h);goScreen('ambulance-detail');
+}
+
+function loadDetail(h){
+  const d=dist(h).toFixed(1),e=eta(h),b=h.beds_emergency_available||0,c=bedCls(b,h.beds_emergency_total||1);
+  document.getElementById('d-ico').style.background=c==='g'?'#dcfce7':c==='a'?'#fef3c7':'#fee2e2';
+  document.getElementById('d-name').textContent=h.name;
+  document.getElementById('d-sub').textContent=`${h.region} · ${h.district||''} · Level ${h.level||2}`;
+  document.getElementById('d-dist').textContent=d+' km';
+  document.getElementById('d-eta').textContent=e+' min';
+  document.getElementById('d-beds').textContent=b;
+  document.getElementById('d-phone').textContent=h.phone||'—';
+  document.getElementById('d-updated').textContent=timeAgo(h.last_updated)+' ✓';
+  const beds=[{l:'🛏 Emergency',a:h.beds_emergency_available,t:h.beds_emergency_total},{l:'🫁 ICU',a:h.beds_icu_available,t:h.beds_icu_total},{l:'🏥 General',a:h.beds_general_available,t:h.beds_general_total},{l:'👶 Maternity',a:h.beds_maternity_available,t:h.beds_maternity_total}];
+  document.getElementById('d-bed-grid').innerHTML=beds.map(b=>{const c=bedCls(b.a,b.t||1),bg=c==='g'?'var(--g50)':c==='a'?'#fffbeb':'#fef2f2',col=c==='g'?'var(--green)':c==='a'?'var(--amber)':'var(--red)';return`<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 10px;background:${bg};border-radius:8px"><span style="font-size:.8rem;font-weight:800">${b.l}</span><span style="font-weight:900;color:${col}">${b.a===0&&c==='r'?'FULL':b.a+' / '+b.t}</span></div>`;}).join('');
+  const svcs=[{ico:'🩻',n:'CT Scan',v:h.ct_scan},{ico:'🔬',n:'MRI',v:h.mri},{ico:'🩸',n:'Blood Bank',v:h.blood_bank},{ico:'💨',n:'Oxygen',v:h.oxygen},{ico:'🔪',n:'Theatre',v:h.theatre},{ico:'⚡',n:'Generator',v:h.generator}];
+  document.getElementById('d-svcs').innerHTML=svcs.map((s,i)=>`<div class="svc-row"${i===svcs.length-1?' style="border:none"':''}><div class="svc-l"><span style="font-size:15px">${s.ico}</span><span style="font-size:.82rem;font-weight:800;color:var(--g900);margin-left:8px">${s.n}</span></div><span class="chip c${svcCls(s.v)}">${svcLbl(s.v)}</span></div>`).join('');
+}
+
+function setFilter(f,el){activeFilter=f;document.querySelectorAll('.ftag').forEach(t=>t.classList.remove('active'));if(el)el.classList.add('active');renderHospList(allHospitals.length?allHospitals:DEMO_HOSPITALS);renderPins(filterH(allHospitals.length?allHospitals:DEMO_HOSPITALS));}
+
+async function confirmDispatch(){
+  const h=(allHospitals.length?allHospitals:DEMO_HOSPITALS).find(x=>x.id===selectedHospId);
+  if(!h){toast('⚠️ Select a hospital first');return;}
+  const e=eta(h);toast(`🚑 Dispatched to ${h.name}. ETA ${e} min.`);
+  if(!demoMode&&fbLocalId){withTO(FB.push('dispatch_log',{hospital_id:h.id,ambulance_uid:fbLocalId,eta_minutes:e,ts:new Date().toISOString(),status:'dispatched'}),3000,null).catch(()=>{});}
+  setTimeout(()=>goScreen('ambulance-map'),2200);
+}
+
+function startNav(){const h=(allHospitals.length?allHospitals:DEMO_HOSPITALS).find(x=>x.id===selectedHospId);if(!h)return;window.open(`https://maps.google.com/maps?q=${h.lat},${h.lng}&navigate=yes`,'_blank');}
+function callHosp(){const h=(allHospitals.length?allHospitals:DEMO_HOSPITALS).find(x=>x.id===selectedHospId);if(!h||!h.phone){toast('No phone number');return;}window.location.href='tel:'+h.phone.replace(/\s/g,'');}
+
+// ── ADMIN ──
+async function loadAdminHome(){
+  if(!allHospitals.length||!demoMode){
+    try{const data=await withTO(FB.getHospitals(),6000,null);if(data&&data.length)allHospitals=data;}
+    catch(e){if(!allHospitals.length)allHospitals=JSON.parse(JSON.stringify(DEMO_HOSPITALS));}
+  }
+  // Start live SSE stream so admin dashboard refreshes the moment any hospital updates
+  if(!demoMode){
+    FB.startStream('hospitals',(data)=>{
+      if(data&&typeof data==='object'){
+        if(Object.values(data)[0]&&typeof Object.values(data)[0]==='object'&&Object.values(data)[0].name){
+          allHospitals=Object.entries(data).map(([id,h])=>({id,...h}));
+        } else {
+          const key=Object.keys(data)[0];
+          const idx=allHospitals.findIndex(x=>x.id===key);
+          if(idx>=0) Object.assign(allHospitals[idx],data[key]);
+        }
+        loadAdminHome();
+      }
+    });
+  }
+  if(!allHospitals.length) allHospitals=JSON.parse(JSON.stringify(DEMO_HOSPITALS));
+  const hs=allHospitals;
+  document.getElementById('st-online').textContent=hs.length;
+  document.getElementById('st-beds').textContent=hs.reduce((s,h)=>s+(h.beds_emergency_available||0),0);
+  document.getElementById('st-full').textContent=hs.filter(h=>h.beds_emergency_available===0).length;
+  document.getElementById('st-stale').textContent=hs.filter(h=>staleHrs(h.last_updated)>6).length;
+  document.getElementById('st-icu').textContent=hs.reduce((s,h)=>s+(h.beds_icu_available||0),0);
+  document.getElementById('st-ct').textContent=hs.filter(h=>h.ct_scan!=='operational').length;
+  const alerts=buildAlerts(hs);
+  document.getElementById('adm-alerts').innerHTML=alerts.map(a=>`<div class="ab ${a.t}" style="margin-bottom:8px"><span class="ab-ico">${a.i}</span><div><div class="ab-title">${a.title}</div><div class="ab-body">${a.body}</div></div></div>`).join('')||'<div style="color:var(--g400);font-size:.82rem;text-align:center;padding:14px">No critical alerts</div>';
+  document.getElementById('adm-tbody').innerHTML=hs.map(h=>{const c=bedCls(h.beds_emergency_available||0,h.beds_emergency_total||1);return`<tr><td><strong>${h.name}</strong><br><span style="font-size:.62rem;color:var(--g400)">${h.region||''}</span></td><td><span class="chip c${c}">${h.beds_emergency_available||0}/${h.beds_emergency_total||0}</span></td><td>${h.beds_icu_available||0}/${h.beds_icu_total||0}</td><td><span class="chip c${svcCls(h.ct_scan)}">${h.ct_scan==='operational'?'ON':'OFF'}</span></td><td style="font-size:.65rem;white-space:nowrap">${timeAgo(h.last_updated)}</td></tr>`;}).join('');
+}
+
+function buildAlerts(hs){
+  const a=[],full=hs.filter(h=>h.beds_emergency_available===0);
+  if(full.length) a.push({t:'r',i:'🔴',title:`${full.length} Hospital${full.length>1?'s':''} at Zero Capacity`,body:full.map(h=>h.name).join(', ')});
+  const stale=hs.filter(h=>staleHrs(h.last_updated)>6);
+  if(stale.length) a.push({t:'a',i:'⚠️',title:`${stale.length} Hospitals — Stale Data >6hrs`,body:'Follow up with hospital staff.'});
+  const ctOff=hs.filter(h=>h.ct_scan!=='operational');
+  if(ctOff.length) a.push({t:'a',i:'🩻',title:`CT Scan Offline — ${ctOff.length} Facilit${ctOff.length>1?'ies':'y'}`,body:ctOff.map(h=>h.name).join(', ')});
+  const blood=hs.filter(h=>(h.blood_oneg||0)<=4);
+  if(blood.length) a.push({t:'r',i:'🩸',title:'O-Neg Blood Critical',body:`${blood.length} facilit${blood.length>1?'ies':'y'} critically low.`});
+  return a;
+}
+
+async function loadAdminHospitals(){
+  if(!allHospitals.length) allHospitals=JSON.parse(JSON.stringify(DEMO_HOSPITALS));
+  document.getElementById('adm-hosp-count').textContent=`${allHospitals.length} pilot hospital${allHospitals.length!==1?'s':''}`;
+  document.getElementById('adm-hosp-list').innerHTML=allHospitals.map(h=>{
+    const c=bedCls(h.beds_emergency_available||0,h.beds_emergency_total||1),sh=staleHrs(h.last_updated);
+    return`<div class="hi" style="margin-bottom:8px;cursor:default"><div class="hi-ava" style="background:${c==='g'?'#dcfce7':c==='a'?'#fef3c7':'#fee2e2'}">🏥</div><div style="flex:1;min-width:0"><div class="hi-name">${h.name}</div><div class="hi-meta">${h.region}${h.district?' · '+h.district:''}</div><div class="hi-chips"><span class="chip c${c}">🛏 ${h.beds_emergency_available||0} emerg</span><span class="chip c${svcCls(h.ct_scan)}">🩻 CT ${h.ct_scan==='operational'?'ON':'OFF'}</span>${sh>6?`<span class="chip cr">⚠ ${Math.floor(sh)}h stale</span>`:`<span class="chip cg">✓ ${timeAgo(h.last_updated)}</span>`}</div></div></div>`;
+  }).join('');
+}
+
+function loadAdminAlertsView(){
+  const hs=allHospitals.length?allHospitals:DEMO_HOSPITALS,alerts=buildAlerts(hs);
+  document.getElementById('adm-alerts-full').innerHTML=`<div class="card">${alerts.map(a=>`<div class="nitem"><div class="nitem-ico ${a.t}">${a.i}</div><div style="flex:1"><div class="nitem-title">${a.title}</div><div class="nitem-body">${a.body}</div></div></div>`).join('')||'<div style="text-align:center;padding:28px;color:var(--g400)">No active alerts</div>'}</div>`;
+}
+
+function sendSurge(){toast('📣 Regional surge alert sent to all pilot hospitals');}
+
+function exportCSV(){
+  const hs=allHospitals.length?allHospitals:DEMO_HOSPITALS;
+  let csv='Hospital,Region,Emerg Available,ICU Available,CT Scan,Blood Bank,Last Updated\n';
+  hs.forEach(h=>{csv+=`"${h.name}","${h.region||''}",${h.beds_emergency_available||0},${h.beds_icu_available||0},${h.ct_scan||''},${h.blood_bank||''},${h.last_updated||''}
+`;});
+  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'}));
+  a.download=`responda-report-${new Date().toISOString().split('T')[0]}.csv`;a.click();
+  toast('📄 Report exported as CSV');
+}
+
+function showSMSInfo(){toast('📩 SMS: BEDS [CODE] [EMERG] [ICU] [GEN] [MAT] → 4447 | USSD: *999#');}
+</script>
+
+<script>
+if('serviceWorker' in navigator){
+  window.addEventListener('load',function(){
+    navigator.serviceWorker.register('/sw.js').catch(function(e){console.warn('SW:',e);});
+  });
+}
+</script>
+</body>
+</html>
