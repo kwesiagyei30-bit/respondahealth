@@ -307,6 +307,220 @@ html,body{width:100%;height:100%;font-family:-apple-system,BlinkMacSystemFont,'S
 .mt8{margin-top:8px}.mt12{margin-top:12px}
 .section-hdr{display:flex;justify-content:space-between;align-items:center}
 .section-title{font-size:.8rem;font-weight:900;color:var(--g700)}
+
+/* ══════════════════════════════════════════
+   LANDSCAPE / DESKTOP DASHBOARD
+   Activates when screen width >= 900px
+   ══════════════════════════════════════════ */
+@media (min-width:900px){
+  /* Hide mobile shell when desktop active */
+  body.desktop-mode .screen:not(#scr-desktop){display:none!important;}
+  body.desktop-mode #scr-desktop{display:flex!important;}
+
+  #scr-desktop{
+    display:none;
+    position:fixed;inset:0;
+    background:#0B1D3A;
+    font-family:'Inter','Segoe UI',Arial,sans-serif;
+    overflow:hidden;
+  }
+
+  /* ── SIDEBAR ── */
+  .ds-sidebar{
+    width:220px;min-width:220px;
+    background:#091528;
+    display:flex;flex-direction:column;
+    border-right:1px solid rgba(255,255,255,.07);
+    z-index:10;
+  }
+  .ds-logo{
+    padding:22px 20px 18px;
+    border-bottom:1px solid rgba(255,255,255,.07);
+  }
+  .ds-logo-name{font-size:1.15rem;font-weight:800;color:#fff;letter-spacing:-.3px;}
+  .ds-logo-name em{color:#0D9488;font-style:normal;}
+  .ds-logo-sub{font-size:.62rem;color:rgba(255,255,255,.35);margin-top:2px;letter-spacing:.08em;text-transform:uppercase;}
+  .ds-live{display:flex;align-items:center;gap:6px;margin-top:10px;padding:6px 10px;background:rgba(13,148,136,.12);border-radius:8px;border:1px solid rgba(13,148,136,.2);}
+  .ds-live-dot{width:7px;height:7px;border-radius:50%;background:#0D9488;animation:pulse 1.4s infinite;}
+  .ds-live-txt{font-size:.65rem;font-weight:700;color:#0D9488;letter-spacing:.06em;}
+
+  .ds-nav{flex:1;padding:12px 0;overflow-y:auto;}
+  .ds-nav-section{font-size:.6rem;color:rgba(255,255,255,.25);letter-spacing:.12em;text-transform:uppercase;padding:14px 20px 6px;}
+  .ds-nav-item{
+    display:flex;align-items:center;gap:10px;
+    padding:10px 20px;cursor:pointer;
+    font-size:.82rem;color:rgba(255,255,255,.55);
+    border-left:3px solid transparent;
+    transition:all .15s;
+  }
+  .ds-nav-item:hover{background:rgba(255,255,255,.05);color:rgba(255,255,255,.85);}
+  .ds-nav-item.active{background:rgba(13,148,136,.12);color:#0D9488;border-left-color:#0D9488;font-weight:700;}
+  .ds-nav-ico{font-size:1rem;width:20px;text-align:center;}
+  .ds-nav-badge{margin-left:auto;background:#EF4444;color:#fff;font-size:.6rem;font-weight:800;padding:2px 6px;border-radius:20px;}
+
+  .ds-user{
+    padding:14px 16px;
+    border-top:1px solid rgba(255,255,255,.07);
+    display:flex;align-items:center;gap:10px;
+  }
+  .ds-ava{width:34px;height:34px;border-radius:50%;background:#0D9488;display:flex;align-items:center;justify-content:center;font-size:1rem;font-weight:800;color:#fff;flex-shrink:0;}
+  .ds-user-info{flex:1;min-width:0;}
+  .ds-user-name{font-size:.78rem;font-weight:700;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .ds-user-role{font-size:.62rem;color:rgba(255,255,255,.35);}
+  .ds-logout{background:none;border:none;color:rgba(255,255,255,.3);cursor:pointer;font-size:.85rem;padding:4px;}
+  .ds-logout:hover{color:#EF4444;}
+
+  /* ── MAIN AREA ── */
+  .ds-main{flex:1;display:flex;flex-direction:column;overflow:hidden;}
+
+  /* ── TOP BAR ── */
+  .ds-topbar{
+    height:56px;min-height:56px;
+    background:#0B1D3A;
+    border-bottom:1px solid rgba(255,255,255,.07);
+    display:flex;align-items:center;
+    padding:0 24px;gap:16px;
+  }
+  .ds-topbar-title{font-size:1rem;font-weight:700;color:#fff;flex:1;}
+  .ds-topbar-time{font-size:.72rem;color:rgba(255,255,255,.35);}
+  .ds-topbar-btn{
+    display:flex;align-items:center;gap:6px;
+    padding:7px 14px;border-radius:8px;border:none;cursor:pointer;
+    font-size:.75rem;font-weight:700;
+  }
+  .ds-topbar-btn.red{background:#EF4444;color:#fff;}
+  .ds-topbar-btn.teal{background:#0D9488;color:#fff;}
+  .ds-topbar-btn.ghost{background:rgba(255,255,255,.07);color:rgba(255,255,255,.7);}
+  .ds-topbar-btn:hover{opacity:.88;}
+
+  /* ── PANELS ── */
+  .ds-panels{flex:1;overflow:hidden;display:flex;flex-direction:column;}
+  .ds-panel{display:none;flex:1;overflow-y:auto;padding:20px 24px;}
+  .ds-panel.active{display:block;}
+
+  /* ── STAT CARDS ── */
+  .ds-stats{display:grid;grid-template-columns:repeat(6,1fr);gap:12px;margin-bottom:20px;}
+  .ds-stat{
+    background:#112240;border-radius:12px;
+    padding:14px 16px;
+    border:1px solid rgba(255,255,255,.06);
+  }
+  .ds-stat-n{font-size:1.65rem;font-weight:800;line-height:1;}
+  .ds-stat-n.g{color:#22C55E;}
+  .ds-stat-n.r{color:#EF4444;}
+  .ds-stat-n.b{color:#3B82F6;}
+  .ds-stat-n.a{color:#F59E0B;}
+  .ds-stat-l{font-size:.62rem;color:rgba(255,255,255,.4);margin-top:5px;text-transform:uppercase;letter-spacing:.06em;}
+  .ds-stat-trend{font-size:.62rem;margin-top:4px;}
+  .ds-stat-trend.up{color:#EF4444;}
+  .ds-stat-trend.ok{color:#22C55E;}
+
+  /* ── TWO COLUMN GRID ── */
+  .ds-grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;}
+  .ds-grid3{display:grid;grid-template-columns:2fr 1fr;gap:16px;margin-bottom:16px;}
+
+  /* ── CARDS ── */
+  .ds-card{
+    background:#112240;border-radius:12px;
+    border:1px solid rgba(255,255,255,.06);
+    overflow:hidden;
+  }
+  .ds-card-hdr{
+    display:flex;align-items:center;justify-content:space-between;
+    padding:14px 18px 10px;
+    border-bottom:1px solid rgba(255,255,255,.06);
+  }
+  .ds-card-title{font-size:.82rem;font-weight:700;color:#fff;}
+  .ds-card-sub{font-size:.65rem;color:rgba(255,255,255,.35);}
+  .ds-card-body{padding:14px 18px;}
+
+  /* ── HOSPITAL TABLE ── */
+  .ds-tbl{width:100%;border-collapse:collapse;font-size:.75rem;}
+  .ds-tbl th{
+    text-align:left;padding:8px 12px;
+    font-size:.62rem;font-weight:700;color:rgba(255,255,255,.35);
+    text-transform:uppercase;letter-spacing:.07em;
+    border-bottom:1px solid rgba(255,255,255,.08);
+    background:#0B1D3A;
+  }
+  .ds-tbl td{
+    padding:10px 12px;
+    border-bottom:1px solid rgba(255,255,255,.04);
+    color:rgba(255,255,255,.8);
+    vertical-align:middle;
+  }
+  .ds-tbl tr:hover td{background:rgba(255,255,255,.03);}
+  .ds-tbl .hosp-name{font-weight:700;color:#fff;font-size:.78rem;}
+  .ds-tbl .hosp-region{font-size:.62rem;color:rgba(255,255,255,.35);margin-top:2px;}
+
+  /* ── CHIPS ── */
+  .ds-chip{display:inline-flex;align-items:center;gap:3px;padding:3px 8px;border-radius:20px;font-size:.65rem;font-weight:700;}
+  .ds-chip.g{background:rgba(34,197,94,.15);color:#22C55E;}
+  .ds-chip.a{background:rgba(245,158,11,.15);color:#F59E0B;}
+  .ds-chip.r{background:rgba(239,68,68,.15);color:#EF4444;}
+
+  /* ── ALERT ITEMS ── */
+  .ds-alert{
+    display:flex;align-items:flex-start;gap:12px;
+    padding:12px 0;
+    border-bottom:1px solid rgba(255,255,255,.05);
+  }
+  .ds-alert:last-child{border-bottom:none;}
+  .ds-alert-ico{font-size:1.2rem;margin-top:1px;}
+  .ds-alert-title{font-size:.78rem;font-weight:700;color:#fff;}
+  .ds-alert-body{font-size:.68rem;color:rgba(255,255,255,.45);margin-top:2px;}
+  .ds-alert.r .ds-alert-title{color:#EF4444;}
+  .ds-alert.a .ds-alert-title{color:#F59E0B;}
+
+  /* ── MINI BAR CHART ── */
+  .ds-chart{display:flex;align-items:flex-end;gap:6px;height:80px;padding:8px 0;}
+  .ds-bar-wrap{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;}
+  .ds-bar{width:100%;border-radius:4px 4px 0 0;transition:height .3s;min-height:4px;}
+  .ds-bar.g{background:#22C55E;}
+  .ds-bar.a{background:#F59E0B;}
+  .ds-bar.r{background:#EF4444;}
+  .ds-bar.b{background:#3B82F6;}
+  .ds-bar-lbl{font-size:.58rem;color:rgba(255,255,255,.3);}
+
+  /* ── HOSPITAL DETAIL SIDE PANEL ── */
+  .ds-detail{
+    position:fixed;top:0;right:0;bottom:0;width:360px;
+    background:#0D1F3C;
+    border-left:1px solid rgba(255,255,255,.08);
+    transform:translateX(100%);
+    transition:transform .25s;
+    z-index:50;overflow-y:auto;
+    padding:0 0 20px;
+  }
+  .ds-detail.open{transform:translateX(0);}
+  .ds-detail-hdr{
+    padding:18px 20px;
+    background:#091528;
+    border-bottom:1px solid rgba(255,255,255,.07);
+    display:flex;align-items:flex-start;gap:12px;
+  }
+  .ds-detail-close{background:none;border:none;color:rgba(255,255,255,.4);cursor:pointer;font-size:1.2rem;margin-left:auto;padding:0;}
+  .ds-detail-close:hover{color:#fff;}
+  .ds-detail-name{font-size:.95rem;font-weight:800;color:#fff;}
+  .ds-detail-meta{font-size:.68rem;color:rgba(255,255,255,.4);margin-top:3px;}
+  .ds-detail-body{padding:16px 20px;}
+  .ds-detail-section{margin-bottom:16px;}
+  .ds-detail-section-title{font-size:.62rem;font-weight:700;color:rgba(255,255,255,.3);text-transform:uppercase;letter-spacing:.1em;margin-bottom:10px;}
+  .ds-bed-row{display:flex;align-items:center;gap:8px;margin-bottom:8px;}
+  .ds-bed-label{font-size:.72rem;color:rgba(255,255,255,.55);width:90px;flex-shrink:0;}
+  .ds-bed-bar-wrap{flex:1;background:rgba(255,255,255,.07);border-radius:4px;height:8px;overflow:hidden;}
+  .ds-bed-bar{height:100%;border-radius:4px;transition:width .4s;}
+  .ds-bed-val{font-size:.7rem;font-weight:700;color:#fff;width:40px;text-align:right;flex-shrink:0;}
+  .ds-svc-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+  .ds-svc-item{padding:8px 10px;border-radius:8px;background:rgba(255,255,255,.04);}
+  .ds-svc-name{font-size:.65rem;color:rgba(255,255,255,.4);}
+  .ds-svc-status{font-size:.72rem;font-weight:700;margin-top:2px;}
+  .ds-svc-status.g{color:#22C55E;}
+  .ds-svc-status.a{color:#F59E0B;}
+  .ds-svc-status.r{color:#EF4444;}
+  .ds-detail-footer{padding:12px 20px 0;border-top:1px solid rgba(255,255,255,.06);}
+  .ds-detail-updated{font-size:.65rem;color:rgba(255,255,255,.3);margin-bottom:10px;}
+}
 </style>
 </head>
 <body>
@@ -797,6 +1011,107 @@ let fbLocalId = '';
 let pollTimer = null;
 let activeStream = null;
 
+// ══════════════════════════════════════════════════════════════
+// STREAM MANAGER — one SSE connection per path, many subscribers
+// Fixes: calling startStream() from multiple screens no longer
+// kills the previous subscription. All roles share one live feed.
+// ══════════════════════════════════════════════════════════════
+const streamMgr = {
+  _streams: {},     // path → { es, subscribers: {id→callback} }
+  _nextId: 1,
+
+  subscribe(path, callback, fbObj, customId){
+    const id = customId || ('sub_' + (this._nextId++));
+
+    if(!this._streams[path]){
+      this._streams[path] = { es: null, subscribers: {}, fbObj };
+      this._connect(path, fbObj);
+    }
+    this._streams[path].subscribers[id] = callback;
+
+    // Immediately deliver current data to new subscriber if we have it
+    if(this._streams[path]._lastData){
+      try{ callback(this._streams[path]._lastData, '/'); }catch(_){}
+    }
+    return id;
+  },
+
+  unsubscribe(id){
+    for(const path in this._streams){
+      delete this._streams[path].subscribers[id];
+    }
+  },
+
+  _fanout(path, data, msgPath){
+    if(this._streams[path]){
+      this._streams[path]._lastData = data;
+      for(const cb of Object.values(this._streams[path].subscribers)){
+        try{ cb(data, msgPath); }catch(_){}
+      }
+    }
+  },
+
+  _connect(path, fbObj){
+    const self = this;
+    const buildUrl = () =>
+      fbObj.dbUrl() + '/' + path + '.json' + '?auth=' + fbIdToken;
+
+    const connect = () => {
+      if(!fbObj.cfg.databaseURL || !fbIdToken) return;
+      try{
+        const es = new EventSource(buildUrl());
+        if(self._streams[path]) self._streams[path].es = es;
+
+        es.addEventListener('put', e => {
+          try{
+            const msg = JSON.parse(e.data);
+            if(msg && msg.data !== null) self._fanout(path, msg.data, msg.path||'/');
+          }catch(_){}
+        });
+
+        es.addEventListener('patch', e => {
+          try{
+            const msg = JSON.parse(e.data);
+            if(msg && msg.data) self._fanout(path, msg.data, msg.path||'/');
+          }catch(_){}
+        });
+
+        es.addEventListener('cancel', () => {
+          es.close();
+          if(self._streams[path]) self._streams[path].es = null;
+          setTimeout(connect, 3000);
+        });
+
+        es.onerror = () => {
+          es.close();
+          if(self._streams[path]) self._streams[path].es = null;
+          setTimeout(connect, 4000);
+        };
+
+      }catch(e){
+        // Very old browser fallback: poll every 5s
+        const t = setInterval(async ()=>{
+          try{
+            const d = await fbObj.get(path);
+            if(d) self._fanout(path, d, '/');
+          }catch(_){}
+        }, 5000);
+        if(self._streams[path]) self._streams[path]._pollTimer = t;
+      }
+    };
+    connect();
+  },
+
+  stopAll(){
+    for(const path in this._streams){
+      const s = this._streams[path];
+      if(s.es){ s.es.close(); s.es = null; }
+      if(s._pollTimer){ clearInterval(s._pollTimer); }
+    }
+    this._streams = {};
+  }
+};
+
 // ── CONFIG ──
 function loadCfg(){ return FIREBASE_CONFIG; } // always returns hardcoded config
 function saveCfg(c){ try{ localStorage.setItem(CFG_KEY,JSON.stringify(c)); }catch(e){} }
@@ -877,64 +1192,28 @@ const FB = {
     return Object.entries(data).map(([id,h])=>({id,...h}));
   },
 
-  // ── REAL-TIME via Firebase SSE ──
-  // Firebase Realtime DB natively supports Server-Sent Events.
-  // Appending ?accept=text/event-stream opens a persistent HTTP
-  // connection. Firebase pushes a "put" event to ALL connected clients
-  // the instant any data changes — true cross-device live sync.
+  // ── REAL-TIME via Firebase SSE — MULTI-SUBSCRIBER FAN-OUT ──
+  // One persistent SSE connection per unique path.
+  // Multiple parts of the app (hospital, ambulance, admin, desktop) can
+  // ALL subscribe to the same stream without cancelling each other.
+  // Each caller gets a subscriber ID; call unsubscribe(id) to remove.
   startStream(path, callback){
-    this.stopStream();
-    if(!this.cfg.databaseURL || !fbIdToken) return;
+    // Delegate to the shared stream manager
+    return streamMgr.subscribe(path, callback, this);
+  },
 
-    const buildUrl = () =>
-      this.dbUrl() + '/' + path + '.json'
-      + '?auth=' + fbIdToken;
+  // Subscribe with an explicit ID so the caller can unsubscribe later
+  subscribeStream(path, id, callback){
+    return streamMgr.subscribe(path, callback, this, id);
+  },
 
-    const connect = () => {
-      try {
-        const es = new EventSource(buildUrl());
-        activeStream = es;
-
-        es.addEventListener('put', e => {
-          try {
-            const msg = JSON.parse(e.data);
-            // path '/' = full snapshot on connect; sub-paths = single node changes
-            if (msg && msg.data !== null) callback(msg.data, msg.path || '/');
-          } catch(_) {}
-        });
-
-        es.addEventListener('patch', e => {
-          try {
-            const msg = JSON.parse(e.data);
-            if (msg && msg.data) callback(msg.data, msg.path || '/');
-          } catch(_) {}
-        });
-
-        // cancel-event means auth token expired — refresh and reconnect
-        es.addEventListener('cancel', () => {
-          es.close(); activeStream = null;
-          setTimeout(connect, 3000);
-        });
-
-        es.onerror = () => {
-          es.close(); activeStream = null;
-          // Reconnect after 4s — handles brief network drops
-          setTimeout(connect, 4000);
-        };
-
-      } catch(e) {
-        // Fallback for very old browsers: poll every 5s
-        pollTimer = setInterval(async () => {
-          try { const d = await this.get(path); if(d) callback(d, '/'); } catch(_){}
-        }, 5000);
-      }
-    };
-
-    connect();
+  unsubscribeStream(id){
+    streamMgr.unsubscribe(id);
   },
 
   stopStream(){
-    if(activeStream){ activeStream.close(); activeStream = null; }
+    // Legacy compat — stops ALL streams (used on logout only)
+    streamMgr.stopAll();
     if(pollTimer){ clearInterval(pollTimer); pollTimer = null; }
   },
 
@@ -965,6 +1244,52 @@ const DEMO_USERS={
 };
 
 // ── HELPERS ──
+
+// ══════════════════════════════════════════════════════
+// SHARED DATA SYNC HELPER
+// All stream subscribers call this one function to merge
+// Firebase updates into allHospitals correctly.
+// Handles two Firebase SSE message shapes:
+//   1. Full snapshot (path '/') — replace all
+//   2. Single hospital update (path '/HOSPITAL_ID') — merge
+// ══════════════════════════════════════════════════════
+function syncHospitalsData(data, msgPath){
+  if(!data || typeof data !== 'object') return;
+
+  // Shape 1: full snapshot — data is {KORLEBU:{...}, MILITARY37:{...}, ...}
+  // Detected by: first value is an object with a 'name' key (hospital record)
+  const vals = Object.values(data);
+  if(vals.length && typeof vals[0] === 'object' && vals[0] !== null && vals[0].name){
+    allHospitals = Object.entries(data).map(([id,h])=>({id,...h}));
+    return;
+  }
+
+  // Shape 2: single hospital update — data is the hospital's fields directly,
+  // OR data is {HOSPITAL_ID: {fields...}} depending on SSE path
+  // Check msgPath to determine which hospital this is
+  if(msgPath && msgPath !== '/'){
+    // msgPath looks like '/KORLEBU' or '/KORLEBU/beds_emergency_available'
+    const parts = msgPath.replace(/^\//, '').split('/');
+    const hospId = parts[0];
+    if(hospId){
+      const idx = allHospitals.findIndex(x=>x.id===hospId);
+      const updateData = typeof data === 'object' && !Array.isArray(data) ? data : {};
+      if(idx>=0) Object.assign(allHospitals[idx], updateData);
+      else allHospitals.push({id:hospId,...updateData});
+      return;
+    }
+  }
+
+  // Fallback: data is {HOSPITAL_ID: {...}} — merge each key
+  for(const [key, val] of Object.entries(data)){
+    if(typeof val === 'object' && val !== null){
+      const idx = allHospitals.findIndex(x=>x.id===key);
+      if(idx>=0) Object.assign(allHospitals[idx], val);
+      else allHospitals.push({id:key,...val});
+    }
+  }
+}
+
 function bedCls(a,t){if(!t)return'r';const p=a/t;return p>0.3?'g':p>0.1?'a':'r';}
 function svcCls(s){if(s==='operational'||s==='adequate')return'g';if(s==='maintenance'||s==='low_stock'||s==='low')return'a';return'r';}
 function svcLbl(s){const m={'operational':'● Online','adequate':'● Adequate','maintenance':'⚙ Maintenance','low_stock':'⚠ Low Stock','low':'⚠ Low','offline':'✗ Offline'};return m[s]||s||'—';}
@@ -1216,7 +1541,16 @@ async function loadHospHome(){
       <span class="chip c${svcCls(s.s)}">${svcLbl(s.s)}</span>
     </div>`).join('');
   if(!demoMode&&h.id){
-    FB.startStream(`hospitals/${h.id}`,(data)=>{currentHospital={id:h.id,...data};loadHospHome();toast('🔄 Live update received');});
+    FB.startStream(`hospitals/${h.id}`,(data)=>{
+      if(!data) return;
+      currentHospital={id:h.id,...data};
+      // Also update allHospitals so admin sees fresh data
+      const idx=allHospitals.findIndex(x=>x.id===h.id);
+      if(idx>=0) Object.assign(allHospitals[idx],data);
+      else if(h.id) allHospitals.push({id:h.id,...data});
+      loadHospHome();
+      toast('🔄 Live update received');
+    });
   }
 }
 
@@ -1302,20 +1636,11 @@ async function loadAmbMap(){
     try{
       const data=await withTO(FB.getHospitals(),6000,null);
       if(data&&data.length) allHospitals=data;
-      FB.startStream('hospitals',(data)=>{
-        if(data && typeof data === 'object'){
-          // SSE initial 'put' gives full snapshot; 'patch' gives single hospital object
-          if(Object.values(data)[0] && typeof Object.values(data)[0] === 'object' && Object.values(data)[0].name){
-            allHospitals=Object.entries(data).map(([id,h])=>({id,...h}));
-          } else {
-            // single hospital update — merge into allHospitals
-            const key=Object.keys(data)[0];
-            const idx=allHospitals.findIndex(x=>x.id===key);
-            if(idx>=0) Object.assign(allHospitals[idx],data[key]);
-            else allHospitals.push({id:key,...data[key]});
-          }
-        }
-        renderHospList(allHospitals);renderPins(allHospitals);
+      FB.subscribeStream('hospitals','amb_hospitals_stream',(data,msgPath)=>{
+        if(!data) return;
+        syncHospitalsData(data, msgPath);
+        renderHospList(allHospitals);
+        renderPins(filterH(allHospitals));
         toast('🔄 Hospital data updated live');
       });
     }catch(e){console.warn('Hospital load:',e.message);}
@@ -1402,17 +1727,10 @@ async function loadAdminHome(){
   }
   // Start live SSE stream so admin dashboard refreshes the moment any hospital updates
   if(!demoMode){
-    FB.startStream('hospitals',(data)=>{
-      if(data&&typeof data==='object'){
-        if(Object.values(data)[0]&&typeof Object.values(data)[0]==='object'&&Object.values(data)[0].name){
-          allHospitals=Object.entries(data).map(([id,h])=>({id,...h}));
-        } else {
-          const key=Object.keys(data)[0];
-          const idx=allHospitals.findIndex(x=>x.id===key);
-          if(idx>=0) Object.assign(allHospitals[idx],data[key]);
-        }
-        loadAdminHome();
-      }
+    FB.subscribeStream('hospitals','adm_hospitals_stream',(data,msgPath)=>{
+      if(!data) return;
+      syncHospitalsData(data, msgPath);
+      loadAdminHome();
     });
   }
   if(!allHospitals.length) allHospitals=JSON.parse(JSON.stringify(DEMO_HOSPITALS));
@@ -1467,6 +1785,326 @@ function exportCSV(){
 }
 
 function showSMSInfo(){toast('📩 SMS: BEDS [CODE] [EMERG] [ICU] [GEN] [MAT] → 4447 | USSD: *999#');}
+
+// ══════════════════════════════════════════
+// DESKTOP DASHBOARD LOGIC
+// ══════════════════════════════════════════
+
+function isDesktop(){ return window.innerWidth >= 900; }
+
+// ── Clock ──
+function runClock(){
+  const el = document.getElementById('ds-clock');
+  if(el){ el.textContent = new Date().toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit',second:'2-digit'}); }
+  setTimeout(runClock, 1000);
+}
+runClock();
+
+// ── Switch between desktop panels ──
+function dsPanel(name){
+  document.querySelectorAll('.ds-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.ds-nav-item').forEach(n => n.classList.remove('active'));
+  const panel = document.getElementById('dsp-'+name);
+  const nav   = document.getElementById('nav-'+name);
+  if(panel) panel.classList.add('active');
+  if(nav)   nav.classList.add('active');
+  const titles = {overview:'National Overview',hospitals:'All Hospitals',alerts:'Active Alerts',blood:'Blood Bank Status'};
+  const el = document.getElementById('ds-panel-title');
+  if(el) el.textContent = titles[name]||name;
+  if(name==='hospitals') dsRenderHospitals();
+  if(name==='alerts')    dsRenderAlerts();
+  if(name==='blood')     dsRenderBlood();
+}
+
+// ── Activate desktop mode when admin logs in on wide screen ──
+function activateDesktop(name){
+  if(!isDesktop()) return false;
+  document.body.classList.add('desktop-mode');
+  const una = document.getElementById('ds-uname');
+  const ava = document.getElementById('ds-ava');
+  if(una) una.textContent = name || 'Administrator';
+  if(ava) ava.textContent = (name||'A')[0].toUpperCase();
+  dsLoadData();
+  return true;
+}
+
+// ── Load/refresh all data ──
+async function dsLoadData(){
+  try{
+    const data = await withTO(FB.getHospitals(), 8000, null);
+    if(data && data.length) allHospitals = data;
+  }catch(e){}
+  if(!allHospitals.length) allHospitals = JSON.parse(JSON.stringify(DEMO_HOSPITALS));
+  dsRenderOverview();
+  // Start SSE stream for live updates
+  if(!demoMode){
+    FB.subscribeStream('hospitals','desk_hospitals_stream',(data,msgPath)=>{
+      if(!data) return;
+      syncHospitalsData(data, msgPath);
+      dsRenderOverview();
+      const activePanel = document.querySelector('.ds-panel.active');
+      if(activePanel){
+        if(activePanel.id==='dsp-hospitals') dsRenderHospitals();
+        if(activePanel.id==='dsp-blood')     dsRenderBlood();
+        if(activePanel.id==='dsp-alerts')    dsRenderAlerts();
+      }
+    });
+  }
+}
+
+function dsRefresh(){ dsLoadData(); toast('🔄 Data refreshed'); }
+
+// ── Render overview stats + table + chart ──
+function dsRenderOverview(){
+  const hs = allHospitals;
+  const alerts = buildAlerts(hs);
+
+  // Stats
+  const s = (id,v) => { const el=document.getElementById(id); if(el) el.textContent=v; };
+  s('ds-st-online', hs.length);
+  s('ds-st-beds',   hs.reduce((a,h)=>a+(h.beds_emergency_available||0),0));
+  s('ds-st-icu',    hs.reduce((a,h)=>a+(h.beds_icu_available||0),0));
+  s('ds-st-mat',    hs.reduce((a,h)=>a+(h.beds_maternity_available||0),0));
+  s('ds-st-full',   hs.filter(h=>h.beds_emergency_available===0).length);
+  s('ds-st-stale',  hs.filter(h=>staleHrs(h.last_updated)>6).length);
+
+  // Alert badge
+  const badge = document.getElementById('ds-alert-badge');
+  if(badge) badge.textContent = alerts.length;
+
+  // Last sync time
+  const sync = document.getElementById('ds-last-sync');
+  if(sync) sync.textContent = 'Last sync: ' + new Date().toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
+
+  // Main table
+  const tbody = document.getElementById('ds-tbody');
+  if(tbody){
+    tbody.innerHTML = hs.map(h => {
+      const ec = bedCls(h.beds_emergency_available||0, h.beds_emergency_total||1);
+      const ic = bedCls(h.beds_icu_available||0, h.beds_icu_total||1);
+      const mc = bedCls(h.beds_maternity_available||0, h.beds_maternity_total||1);
+      const sh = staleHrs(h.last_updated);
+      return `<tr style="cursor:pointer" onclick="dsOpenDetail('${h.id}')">
+        <td><div class="hosp-name">${h.name}</div></td>
+        <td><span style="font-size:.65rem;color:rgba(255,255,255,.4)">Level ${h.level||'—'}</span></td>
+        <td><span class="ds-chip ${ec}">${h.beds_emergency_available||0} / ${h.beds_emergency_total||0}</span></td>
+        <td><span class="ds-chip ${ic}">${h.beds_icu_available||0} / ${h.beds_icu_total||0}</span></td>
+        <td><span class="ds-chip ${mc}">${h.beds_maternity_available||0} / ${h.beds_maternity_total||0}</span></td>
+        <td><span class="ds-chip ${svcCls(h.ct_scan)}">${h.ct_scan==='operational'?'✓ Online':'✗ Offline'}</span></td>
+        <td><span class="ds-chip ${svcCls(h.blood_bank)}">${h.blood_bank||'—'}</span></td>
+        <td style="font-size:.65rem;color:${sh>6?'#F59E0B':'rgba(255,255,255,.45)'}">${timeAgo(h.last_updated)}<br>
+          <span style="color:rgba(255,255,255,.3)">${h.updated_by_name||''}</span>
+        </td>
+      </tr>`;
+    }).join('');
+  }
+
+  // Mini alerts
+  const miniAlerts = document.getElementById('ds-alerts-mini');
+  if(miniAlerts){
+    miniAlerts.innerHTML = alerts.length
+      ? alerts.slice(0,4).map(a=>`<div class="ds-alert ${a.t}">
+          <div class="ds-alert-ico">${a.i}</div>
+          <div><div class="ds-alert-title">${a.title}</div>
+          <div class="ds-alert-body">${a.body}</div></div>
+        </div>`).join('')
+      : '<div style="color:rgba(255,255,255,.3);font-size:.75rem;text-align:center;padding:16px 0">✓ No active alerts</div>';
+  }
+
+  // Bed capacity chart
+  const chart = document.getElementById('ds-bed-chart');
+  if(chart){
+    const max = Math.max(...hs.map(h=>h.beds_emergency_total||0), 1);
+    chart.innerHTML = hs.map(h=>{
+      const pct = Math.round(((h.beds_emergency_available||0)/(h.beds_emergency_total||1))*100);
+      const cls = pct > 30 ? 'g' : pct > 10 ? 'a' : 'r';
+      const shortName = h.name.split(' ').slice(-2).join(' ');
+      return `<div class="ds-bar-wrap">
+        <div class="ds-bar ${cls}" style="height:${Math.max(pct,5)}%"></div>
+        <div class="ds-bar-lbl">${shortName.substring(0,8)}</div>
+      </div>`;
+    }).join('');
+  }
+}
+
+// ── Render full hospitals panel ──
+function dsRenderHospitals(){
+  const hs = allHospitals;
+  const tbody = document.getElementById('ds-hosp-tbody');
+  if(!tbody) return;
+  tbody.innerHTML = hs.map(h => {
+    const ec = bedCls(h.beds_emergency_available||0, h.beds_emergency_total||1);
+    const ic = bedCls(h.beds_icu_available||0, h.beds_icu_total||1);
+    const gc = bedCls(h.beds_general_available||0, h.beds_general_total||1);
+    const mc = bedCls(h.beds_maternity_available||0, h.beds_maternity_total||1);
+    const pc = bedCls(h.beds_paediatric_available||0, h.beds_paediatric_total||1);
+    return `<tr style="cursor:pointer" onclick="dsOpenDetail('${h.id}')">
+      <td><div class="hosp-name">${h.name}</div><div class="hosp-region">${h.region||''}${h.district?' · '+h.district:''}</div></td>
+      <td><span style="font-size:.68rem;color:rgba(255,255,255,.4)">L${h.level||'—'}</span></td>
+      <td><span class="ds-chip ${ec}">${h.beds_emergency_available||0}/${h.beds_emergency_total||0}</span></td>
+      <td><span class="ds-chip ${ic}">${h.beds_icu_available||0}/${h.beds_icu_total||0}</span></td>
+      <td><span class="ds-chip ${gc}">${h.beds_general_available||0}/${h.beds_general_total||0}</span></td>
+      <td><span class="ds-chip ${mc}">${h.beds_maternity_available||0}/${h.beds_maternity_total||0}</span></td>
+      <td><span class="ds-chip ${pc}">${h.beds_paediatric_available||0}/${h.beds_paediatric_total||0}</span></td>
+      <td><span class="ds-chip ${svcCls(h.oxygen)}">${h.oxygen||'—'}</span></td>
+      <td><span class="ds-chip ${svcCls(h.theatre)}">${h.theatre==='operational'?'✓':'✗'}</span></td>
+      <td style="font-size:.65rem;color:rgba(255,255,255,.5)">${h.updated_by_name||'—'}<br><span style="color:rgba(255,255,255,.25)">${h.updated_by_hospital||''}</span></td>
+      <td style="font-size:.65rem;color:rgba(255,255,255,.4)">${timeAgo(h.last_updated)}</td>
+    </tr>`;
+  }).join('');
+}
+
+// ── Render alerts panel ──
+function dsRenderAlerts(){
+  const hs = allHospitals;
+  const alerts = buildAlerts(hs);
+  const critical = alerts.filter(a=>a.t==='r');
+  const warnings = alerts.filter(a=>a.t==='a');
+
+  const renderList = (items, emptyMsg) => items.length
+    ? items.map(a=>`<div class="ds-alert ${a.t}">
+        <div class="ds-alert-ico">${a.i}</div>
+        <div><div class="ds-alert-title">${a.title}</div>
+        <div class="ds-alert-body">${a.body}</div></div>
+      </div>`).join('')
+    : `<div style="color:rgba(255,255,255,.3);font-size:.75rem;text-align:center;padding:20px 0">${emptyMsg}</div>`;
+
+  const fc = document.getElementById('ds-alerts-full');
+  const fw = document.getElementById('ds-warnings-full');
+  if(fc) fc.innerHTML = renderList(critical, '✓ No critical alerts');
+  if(fw) fw.innerHTML = renderList(warnings, '✓ No warnings');
+}
+
+// ── Render blood bank panel ──
+function dsRenderBlood(){
+  const hs = allHospitals;
+  const tbody = document.getElementById('ds-blood-tbody');
+  if(!tbody) return;
+  tbody.innerHTML = hs.map(h => {
+    const oneg = h.blood_oneg||0;
+    const opos = h.blood_opos||0;
+    const apos = h.blood_apos||0;
+    const bpos = h.blood_bpos||0;
+    const neg_cls = oneg<=4?'r':oneg<=10?'a':'g';
+    return `<tr>
+      <td><div class="hosp-name">${h.name}</div><div class="hosp-region">${h.region||''}</div></td>
+      <td><span class="ds-chip ${neg_cls}">${oneg} units</span></td>
+      <td><span class="ds-chip ${opos<=10?'a':'g'}">${opos} units</span></td>
+      <td><span class="ds-chip ${apos<=10?'a':'g'}">${apos} units</span></td>
+      <td><span class="ds-chip ${bpos<=10?'a':'g'}">${bpos} units</span></td>
+      <td><span class="ds-chip ${svcCls(h.blood_bank)}">${h.blood_bank||'—'}</span></td>
+      <td>${oneg<=4?'<span class="ds-chip r">⚠ Critical</span>':oneg<=10?'<span class="ds-chip a">Low</span>':'<span class="ds-chip g">Adequate</span>'}</td>
+    </tr>`;
+  }).join('');
+}
+
+// ── Hospital detail slide-in ──
+function dsOpenDetail(hospId){
+  const h = allHospitals.find(x=>x.id===hospId);
+  if(!h) return;
+
+  document.getElementById('ds-d-name').textContent = h.name;
+  document.getElementById('ds-d-meta').textContent = (h.region||'') + (h.district?' · '+h.district:'') + ' · Level '+(h.level||'—');
+
+  const bedRow = (label, avail, total) => {
+    const pct = total ? Math.round((avail/total)*100) : 0;
+    const cls = pct>30?'#22C55E':pct>10?'#F59E0B':'#EF4444';
+    return `<div class="ds-bed-row">
+      <div class="ds-bed-label">${label}</div>
+      <div class="ds-bed-bar-wrap"><div class="ds-bed-bar" style="width:${pct}%;background:${cls}"></div></div>
+      <div class="ds-bed-val">${avail}/${total}</div>
+    </div>`;
+  };
+
+  const svcItem = (name, status) => {
+    const cls = svcCls(status);
+    const label = status==='operational'?'Operational':status==='maintenance'?'Maintenance':status==='low_stock'?'Low Stock':status==='low'?'Low':status==='adequate'?'Adequate':status||'Unknown';
+    return `<div class="ds-svc-item">
+      <div class="ds-svc-name">${name}</div>
+      <div class="ds-svc-status ${cls}">${label}</div>
+    </div>`;
+  };
+
+  document.getElementById('ds-d-body').innerHTML = `
+    <div class="ds-detail-section">
+      <div class="ds-detail-section-title">Bed Availability</div>
+      ${bedRow('Emergency', h.beds_emergency_available||0, h.beds_emergency_total||0)}
+      ${bedRow('ICU', h.beds_icu_available||0, h.beds_icu_total||0)}
+      ${bedRow('General', h.beds_general_available||0, h.beds_general_total||0)}
+      ${bedRow('Maternity', h.beds_maternity_available||0, h.beds_maternity_total||0)}
+      ${bedRow('Paediatric', h.beds_paediatric_available||0, h.beds_paediatric_total||0)}
+    </div>
+    <div class="ds-detail-section">
+      <div class="ds-detail-section-title">Services & Equipment</div>
+      <div class="ds-svc-grid">
+        ${svcItem('CT Scan', h.ct_scan)}
+        ${svcItem('MRI', h.mri)}
+        ${svcItem('Blood Bank', h.blood_bank)}
+        ${svcItem('Oxygen', h.oxygen)}
+        ${svcItem('Theatre', h.theatre)}
+        ${svcItem('Generator', h.generator)}
+      </div>
+    </div>
+    <div class="ds-detail-section">
+      <div class="ds-detail-section-title">Blood Bank Stock</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+        <div class="ds-svc-item"><div class="ds-svc-name">O-Negative</div><div class="ds-svc-status ${(h.blood_oneg||0)<=4?'r':(h.blood_oneg||0)<=10?'a':'g'}">${h.blood_oneg||0} units</div></div>
+        <div class="ds-svc-item"><div class="ds-svc-name">O-Positive</div><div class="ds-svc-status g">${h.blood_opos||0} units</div></div>
+        <div class="ds-svc-item"><div class="ds-svc-name">A-Positive</div><div class="ds-svc-status g">${h.blood_apos||0} units</div></div>
+        <div class="ds-svc-item"><div class="ds-svc-name">B-Positive</div><div class="ds-svc-status g">${h.blood_bpos||0} units</div></div>
+      </div>
+    </div>
+    ${h.notes ? `<div class="ds-detail-section">
+      <div class="ds-detail-section-title">Notes</div>
+      <div style="font-size:.75rem;color:rgba(255,255,255,.55);line-height:1.5">${h.notes}</div>
+    </div>` : ''}
+    <div class="ds-detail-footer">
+      <div class="ds-detail-updated">
+        Last updated ${timeAgo(h.last_updated)}
+        ${h.updated_by_name ? ' · ' + h.updated_by_name : ''}
+        ${h.updated_by_hospital ? ' @ ' + h.updated_by_hospital : ''}
+      </div>
+      <button class="ds-topbar-btn ghost" style="width:100%;justify-content:center" onclick="window.location.href='tel:${(h.phone||'').replace(/\s/g,'')}'">📞 Call ${h.phone||'—'}</button>
+    </div>
+  `;
+
+  document.getElementById('ds-detail').classList.add('open');
+}
+
+function dsCloseDetail(){
+  document.getElementById('ds-detail').classList.remove('open');
+}
+
+// Close detail on Escape key
+document.addEventListener('keydown', e => { if(e.key==='Escape') dsCloseDetail(); });
+
+// ── Hook into routeByProfile to activate desktop for admin ──
+// Override happens after routeByProfile is defined
+const _origRoute = routeByProfile;
+window.routeByProfile = function(profile){
+  if(profile.role==='admin' && isDesktop()){
+    currentRole = profile.role;
+    const name = currentUser?.full_name || profile.full_name || 'Administrator';
+    document.getElementById('ds-uname') && (document.getElementById('ds-uname').textContent = name);
+    document.getElementById('adm-name') && (document.getElementById('adm-name').textContent = name);
+    activateDesktop(name);
+  } else {
+    _origRoute(profile);
+  }
+};
+
+// ── Also handle window resize — switch modes if screen size changes ──
+window.addEventListener('resize', () => {
+  if(currentRole==='admin'){
+    if(isDesktop() && !document.body.classList.contains('desktop-mode')){
+      activateDesktop(currentUser?.full_name||'Administrator');
+    } else if(!isDesktop() && document.body.classList.contains('desktop-mode')){
+      document.body.classList.remove('desktop-mode');
+      goScreen('admin-home');
+    }
+  }
+});
+
 </script>
 
 <script>
@@ -1476,5 +2114,228 @@ if('serviceWorker' in navigator){
   });
 }
 </script>
+
+<!-- ══════════════════════════════════════════
+     DESKTOP / LANDSCAPE DASHBOARD
+     Shown on screens >= 900px width
+     ══════════════════════════════════════════ -->
+<div id="scr-desktop">
+
+  <!-- SIDEBAR -->
+  <div class="ds-sidebar">
+    <div class="ds-logo">
+      <div class="ds-logo-name">Responda<em>Health</em></div>
+      <div class="ds-logo-sub">Real-Time Emergency Coordination</div>
+      <div class="ds-live">
+        <div class="ds-live-dot"></div>
+        <div class="ds-live-txt">LIVE · respondahealth</div>
+      </div>
+    </div>
+
+    <nav class="ds-nav">
+      <div class="ds-nav-section">Overview</div>
+      <div class="ds-nav-item active" id="nav-overview" onclick="dsPanel('overview')">
+        <span class="ds-nav-ico">📊</span> National Overview
+      </div>
+      <div class="ds-nav-item" id="nav-hospitals" onclick="dsPanel('hospitals')">
+        <span class="ds-nav-ico">🏥</span> All Hospitals
+      </div>
+      <div class="ds-nav-section">Operations</div>
+      <div class="ds-nav-item" id="nav-alerts" onclick="dsPanel('alerts')">
+        <span class="ds-nav-ico">🚨</span> Active Alerts
+        <span class="ds-nav-badge" id="ds-alert-badge">0</span>
+      </div>
+      <div class="ds-nav-item" id="nav-blood" onclick="dsPanel('blood')">
+        <span class="ds-nav-ico">🩸</span> Blood Bank
+      </div>
+      <div class="ds-nav-section">Reports</div>
+      <div class="ds-nav-item" id="nav-export" onclick="exportCSV()">
+        <span class="ds-nav-ico">📄</span> Export CSV
+      </div>
+    </nav>
+
+    <div class="ds-user">
+      <div class="ds-ava" id="ds-ava">A</div>
+      <div class="ds-user-info">
+        <div class="ds-user-name" id="ds-uname">Administrator</div>
+        <div class="ds-user-role">Health Administrator · GHS</div>
+      </div>
+      <button class="ds-logout" onclick="doLogout()" title="Sign out">⏻</button>
+    </div>
+  </div>
+
+  <!-- MAIN -->
+  <div class="ds-main">
+
+    <!-- TOP BAR -->
+    <div class="ds-topbar">
+      <div class="ds-topbar-title" id="ds-panel-title">National Overview</div>
+      <div class="ds-topbar-time" id="ds-clock">--:--:--</div>
+      <button class="ds-topbar-btn teal" onclick="dsRefresh()">🔄 Refresh</button>
+      <button class="ds-topbar-btn red" onclick="sendSurge()">📣 Issue Alert</button>
+      <button class="ds-topbar-btn ghost" onclick="exportCSV()">📄 Export</button>
+    </div>
+
+    <div class="ds-panels">
+
+      <!-- ── PANEL: OVERVIEW ── -->
+      <div class="ds-panel active" id="dsp-overview">
+        <!-- Stat cards -->
+        <div class="ds-stats">
+          <div class="ds-stat">
+            <div class="ds-stat-n b" id="ds-st-online">—</div>
+            <div class="ds-stat-l">Hospitals Online</div>
+          </div>
+          <div class="ds-stat">
+            <div class="ds-stat-n g" id="ds-st-beds">—</div>
+            <div class="ds-stat-l">Emergency Beds Free</div>
+          </div>
+          <div class="ds-stat">
+            <div class="ds-stat-n b" id="ds-st-icu">—</div>
+            <div class="ds-stat-l">ICU Beds Free</div>
+          </div>
+          <div class="ds-stat">
+            <div class="ds-stat-n g" id="ds-st-mat">—</div>
+            <div class="ds-stat-l">Maternity Beds Free</div>
+          </div>
+          <div class="ds-stat">
+            <div class="ds-stat-n r" id="ds-st-full">—</div>
+            <div class="ds-stat-l">At Zero Capacity</div>
+          </div>
+          <div class="ds-stat">
+            <div class="ds-stat-n a" id="ds-st-stale">—</div>
+            <div class="ds-stat-l">Stale Data &gt;6hrs</div>
+          </div>
+        </div>
+
+        <div class="ds-grid3">
+          <!-- Hospital table -->
+          <div class="ds-card">
+            <div class="ds-card-hdr">
+              <div>
+                <div class="ds-card-title">All Hospitals — Live Status</div>
+                <div class="ds-card-sub" id="ds-last-sync">Syncing...</div>
+              </div>
+            </div>
+            <div style="overflow-x:auto">
+              <table class="ds-tbl">
+                <thead>
+                  <tr>
+                    <th>Hospital</th>
+                    <th>Region</th>
+                    <th>Emergency</th>
+                    <th>ICU</th>
+                    <th>Maternity</th>
+                    <th>CT Scan</th>
+                    <th>Blood Bank</th>
+                    <th>Last Updated</th>
+                  </tr>
+                </thead>
+                <tbody id="ds-tbody"></tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Alerts + chart -->
+          <div style="display:flex;flex-direction:column;gap:16px;">
+            <div class="ds-card">
+              <div class="ds-card-hdr">
+                <div class="ds-card-title">🚨 Active Alerts</div>
+              </div>
+              <div class="ds-card-body" id="ds-alerts-mini"></div>
+            </div>
+            <div class="ds-card">
+              <div class="ds-card-hdr">
+                <div class="ds-card-title">Emergency Bed Capacity</div>
+                <div class="ds-card-sub">All hospitals</div>
+              </div>
+              <div class="ds-card-body">
+                <div class="ds-chart" id="ds-bed-chart"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── PANEL: HOSPITALS ── -->
+      <div class="ds-panel" id="dsp-hospitals">
+        <div class="ds-card">
+          <div class="ds-card-hdr">
+            <div>
+              <div class="ds-card-title">All Pilot Hospitals</div>
+              <div class="ds-card-sub">Click any row for full detail</div>
+            </div>
+          </div>
+          <div style="overflow-x:auto">
+            <table class="ds-tbl">
+              <thead>
+                <tr>
+                  <th>Hospital</th>
+                  <th>Level</th>
+                  <th>Emergency</th>
+                  <th>ICU</th>
+                  <th>General</th>
+                  <th>Maternity</th>
+                  <th>Paediatric</th>
+                  <th>O2</th>
+                  <th>Theatre</th>
+                  <th>Updated By</th>
+                  <th>Last Update</th>
+                </tr>
+              </thead>
+              <tbody id="ds-hosp-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── PANEL: ALERTS ── -->
+      <div class="ds-panel" id="dsp-alerts">
+        <div class="ds-grid2">
+          <div class="ds-card">
+            <div class="ds-card-hdr"><div class="ds-card-title">🚨 Critical Alerts</div></div>
+            <div class="ds-card-body" id="ds-alerts-full"></div>
+          </div>
+          <div class="ds-card">
+            <div class="ds-card-hdr"><div class="ds-card-title">⚠️ Warnings</div></div>
+            <div class="ds-card-body" id="ds-warnings-full"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── PANEL: BLOOD BANK ── -->
+      <div class="ds-panel" id="dsp-blood">
+        <div class="ds-card">
+          <div class="ds-card-hdr">
+            <div class="ds-card-title">🩸 Blood Bank Status — All Facilities</div>
+            <div class="ds-card-sub">Units available per blood type</div>
+          </div>
+          <div style="overflow-x:auto">
+            <table class="ds-tbl">
+              <thead>
+                <tr><th>Hospital</th><th>O-Neg</th><th>O-Pos</th><th>A-Pos</th><th>B-Pos</th><th>Blood Bank</th><th>Status</th></tr>
+              </thead>
+              <tbody id="ds-blood-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /ds-panels -->
+  </div><!-- /ds-main -->
+</div><!-- /scr-desktop -->
+
+<!-- Hospital detail slide-in -->
+<div class="ds-detail" id="ds-detail">
+  <div class="ds-detail-hdr">
+    <div>
+      <div class="ds-detail-name" id="ds-d-name">Hospital</div>
+      <div class="ds-detail-meta" id="ds-d-meta">Region · District</div>
+    </div>
+    <button class="ds-detail-close" onclick="dsCloseDetail()">✕</button>
+  </div>
+  <div class="ds-detail-body" id="ds-d-body"></div>
+</div>
+
 </body>
 </html>
