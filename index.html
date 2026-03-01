@@ -1371,7 +1371,7 @@ async function runInit(){
     }
     const profile=await withTO(FB.getProfile(fbLocalId),10000,null);
     if(!profile){goScreen('login');return;}
-    currentUser={uid:fbLocalId,email:profile.email||'',full_name:profile.full_name||profile.email||''};
+    currentUser={uid:fbLocalId,email:profile.email||'',full_name:profile.full_name||profile.email||'',hospital_name:profile.hospital_name||''};
     routeByProfile(profile);
   }catch(e){console.warn('Init:',e.message);goScreen('login');}
 }
@@ -1402,7 +1402,7 @@ async function doLogin(){
     if(!data) throw new Error('Connection timed out. Check your internet.');
     fbIdToken=data.idToken; fbLocalId=data.localId;
     saveSession(fbIdToken,fbLocalId,data.refreshToken);
-    currentUser={uid:fbLocalId,email:data.email};
+    currentUser={uid:fbLocalId,email:data.email,hospital_name:''};
     const profile=await withTO(FB.getProfile(fbLocalId),10000,null);
     if(!profile){
       const shortUid = fbLocalId ? fbLocalId.substring(0,8)+'...' : 'unknown';
@@ -1410,7 +1410,7 @@ async function doLogin(){
       console.error('No profile found. UID:', fbLocalId, '— check Realtime Database users/'+fbLocalId);
       clearSession();return;
     }
-    currentUser={uid:fbLocalId,email:data.email,full_name:profile.full_name||data.email};
+    currentUser={uid:fbLocalId,email:data.email,full_name:profile.full_name||data.email,hospital_name:profile.hospital_name||''};
     routeByProfile(profile);
   }catch(e){
     const m=e.message||'';
@@ -1427,12 +1427,28 @@ function routeByProfile(profile){
   currentRole=profile.role;
   if(profile.role==='staff'){
     // When Firebase is active, don't pre-load from demo — hospital data will come from SSE stream
-    let h = allHospitals.find(x=>x.id===profile.hospital);
-    if(!h){ h = DEMO_HOSPITALS.find(x=>x.id===profile.hospital)||DEMO_HOSPITALS[0]; }
-    currentHospital = {...h}; // use a copy so Firebase updates don't get blocked
+    // Build currentHospital — try live data first, then demo data, then profile fallback.
+    // This guarantees name is always set even before hospital data loads from Firebase.
+    let h = allHospitals.find(x=>x.id===profile.hospital)
+         || DEMO_HOSPITALS.find(x=>x.id===profile.hospital);
+    if(h){
+      currentHospital = {...h};
+    } else {
+      // Hospital data not yet loaded — create a minimal record from the profile
+      // so updated_by_hospital is correct from the very first publish
+      currentHospital = {
+        id: profile.hospital || '',
+        name: profile.hospital_name || profile.hospital || 'Unknown Hospital'
+      };
+    }
     document.getElementById('hh-name').textContent=currentHospital.name;
     document.getElementById('p-name').textContent=profile.full_name||'Staff';
     document.getElementById('p-hosp').textContent=currentHospital.name;
+    // Self-heal: if profile is missing hospital_name, write it silently (fixes existing pilot users)
+    if(!profile.hospital_name && currentHospital.name && fbLocalId && !demoMode){
+      FB.patch(`users/${fbLocalId}`,{hospital_name:currentHospital.name}).catch(()=>{});
+      if(currentUser) currentUser.hospital_name = currentHospital.name;
+    }
     goScreen('hospital-home');
   }else if(profile.role==='ambulance'){
     document.getElementById('amb-name').textContent=profile.full_name||'Driver';
@@ -1487,7 +1503,12 @@ async function doRegister(){
     if(!data) throw new Error('Timed out');
     fbIdToken=data.idToken; fbLocalId=data.localId;
     const profile={full_name:name,phone,staff_id:sid,role,email};
-    if(role==='staff') profile.hospital=hosp;
+    if(role==='staff'){
+      profile.hospital = hosp;
+      // Also store the display name so it's always available on login, even before hospital data loads
+      const hospRecord = DEMO_HOSPITALS.find(x=>x.id===hosp);
+      if(hospRecord) profile.hospital_name = hospRecord.name;
+    }
     if(role==='ambulance') profile.vehicle_id=sid;
     await withTO(FB.set(`users/${fbLocalId}`,profile),5000,null);
     toast('✅ Account created! You can now sign in.');
@@ -1543,11 +1564,13 @@ async function loadHospHome(){
   if(!demoMode&&h.id){
     FB.startStream(`hospitals/${h.id}`,(data)=>{
       if(!data) return;
-      currentHospital={id:h.id,...data};
+      // Merge live data into currentHospital — keep the id, merge fresh fields
+      const freshName = data.name || currentHospital?.name || h.id;
+      currentHospital = {id:h.id, ...data, name:freshName};
       // Also update allHospitals so admin sees fresh data
       const idx=allHospitals.findIndex(x=>x.id===h.id);
-      if(idx>=0) Object.assign(allHospitals[idx],data);
-      else if(h.id) allHospitals.push({id:h.id,...data});
+      if(idx>=0) Object.assign(allHospitals[idx], data, {name:freshName});
+      else if(h.id) allHospitals.push({id:h.id,...data,name:freshName});
       loadHospHome();
       toast('🔄 Live update received');
     });
@@ -1596,7 +1619,7 @@ async function publishUpdate(){
     notes:document.getElementById('upd-notes').value,
     last_updated:new Date().toISOString(),
     updated_by_name:currentUser?.full_name||currentUser?.email||'Staff',
-    updated_by_hospital:currentHospital?.name||''
+    updated_by_hospital:currentHospital?.name||currentUser?.hospital_name||''
   };
   if(demoMode){
     // Only block publish in explicit demo mode
