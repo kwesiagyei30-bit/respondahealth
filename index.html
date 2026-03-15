@@ -1007,6 +1007,96 @@ let activeFilter = 'all';
 let stepVals = { emb:0, icu:0, gen:0, mat:0, ped:0 };
 let allHospitals = [];
 let fbIdToken = '';
+
+// ══════════════════════════════════════════════════════════════
+// IDLE AUTO-LOGOUT — 10 minutes of inactivity
+// Tracks mouse, touch, keyboard and scroll events.
+// Shows a 60-second warning before logging out.
+// Only active when a user is logged in (currentRole != null).
+// ══════════════════════════════════════════════════════════════
+const IDLE_TIMEOUT_MS  = 10 * 60 * 1000;  // 10 minutes
+const IDLE_WARN_MS     =  9 * 60 * 1000;  //  9 minutes — show warning 1 min before
+let   _idleTimer       = null;
+let   _idleWarnTimer   = null;
+let   _idleWarnVisible = false;
+
+function _resetIdle(){
+  if(!currentRole) return;           // not logged in — do nothing
+  _dismissIdleWarn();
+  clearTimeout(_idleTimer);
+  clearTimeout(_idleWarnTimer);
+
+  // Warning at 9 minutes
+  _idleWarnTimer = setTimeout(()=>{
+    if(!currentRole) return;
+    _showIdleWarn();
+  }, IDLE_WARN_MS);
+
+  // Logout at 10 minutes
+  _idleTimer = setTimeout(()=>{
+    if(!currentRole) return;
+    _idleLogout();
+  }, IDLE_TIMEOUT_MS);
+}
+
+function _showIdleWarn(){
+  _idleWarnVisible = true;
+  let el = document.getElementById('idle-warn');
+  if(!el){
+    el = document.createElement('div');
+    el.id = 'idle-warn';
+    el.style.cssText = [
+      'position:fixed','top:0','left:0','right:0','z-index:9999',
+      'background:#B45309','color:#fff','text-align:center',
+      'padding:12px 16px','font-family:Arial,sans-serif','font-size:.85rem',
+      'font-weight:700','display:flex','align-items:center','justify-content:center','gap:12px',
+      'box-shadow:0 2px 12px rgba(0,0,0,.3)'
+    ].join(';');
+    el.innerHTML = '⏱ You will be logged out in <span id="idle-countdown">60</span>s due to inactivity. &nbsp;<button onclick="_resetIdle()" style="background:#fff;color:#B45309;border:none;padding:4px 12px;border-radius:6px;font-weight:800;cursor:pointer;font-size:.82rem">Stay Logged In</button>';
+    document.body.appendChild(el);
+  } else {
+    el.style.display = 'flex';
+  }
+  // Countdown ticker
+  let secs = 60;
+  const tick = setInterval(()=>{
+    secs--;
+    const cd = document.getElementById('idle-countdown');
+    if(cd) cd.textContent = secs;
+    if(secs <= 0 || !_idleWarnVisible) clearInterval(tick);
+  }, 1000);
+}
+
+function _dismissIdleWarn(){
+  _idleWarnVisible = false;
+  const el = document.getElementById('idle-warn');
+  if(el) el.style.display = 'none';
+}
+
+function _idleLogout(){
+  _dismissIdleWarn();
+  clearTimeout(_idleTimer);
+  clearTimeout(_idleWarnTimer);
+  doLogout();
+  // Show a brief message on the login screen
+  setTimeout(()=>{
+    toast('🔒 You were logged out after 10 minutes of inactivity.');
+  }, 400);
+}
+
+function _startIdleTracking(){
+  ['mousemove','mousedown','keydown','touchstart','touchmove','scroll','click'].forEach(evt=>{
+    document.addEventListener(evt, _resetIdle, { passive:true });
+  });
+  _resetIdle(); // start the first timer
+}
+
+function _stopIdleTracking(){
+  clearTimeout(_idleTimer);
+  clearTimeout(_idleWarnTimer);
+  _dismissIdleWarn();
+}
+
 let fbLocalId = '';
 let pollTimer = null;
 let activeStream = null;
@@ -1449,12 +1539,15 @@ function routeByProfile(profile){
       FB.patch(`users/${fbLocalId}`,{hospital_name:currentHospital.name}).catch(()=>{});
       if(currentUser) currentUser.hospital_name = currentHospital.name;
     }
+    _startIdleTracking();
     goScreen('hospital-home');
   }else if(profile.role==='ambulance'){
     document.getElementById('amb-name').textContent=profile.full_name||'Driver';
+    _startIdleTracking();
     goScreen('ambulance-map');
   }else if(profile.role==='admin'){
     document.getElementById('adm-name').textContent=profile.full_name||'Administrator';
+    _startIdleTracking();
     goScreen('admin-home');
   }else{
     toast('⚠️ Unknown role — contact administrator');
@@ -1471,9 +1564,13 @@ function emergencyAccess(){
 }
 
 function doLogout(){
+  _stopIdleTracking();
   FB.stopStream(); clearSession();
   currentUser=null;currentRole=null;currentHospital=null;
   fbIdToken='';fbLocalId='';demoMode=false;allHospitals=[];
+  if(document.body.classList.contains('desktop-mode')){
+    document.body.classList.remove('desktop-mode');
+  }
   goScreen('login');
 }
 
@@ -1847,6 +1944,7 @@ function activateDesktop(name){
   const ava = document.getElementById('ds-ava');
   if(una) una.textContent = name || 'Administrator';
   if(ava) ava.textContent = (name||'A')[0].toUpperCase();
+  _startIdleTracking();
   dsLoadData();
   return true;
 }
